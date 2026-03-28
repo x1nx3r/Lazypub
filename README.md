@@ -4,6 +4,25 @@ Congratulations. You found a way to avoid actually reading Japanese while preten
 
 With the new persistent architecture, Lazypub has moved past the "volatile memory" phase of its life. Projects are now actual folders on your hard drive, just like a real developer would have.
 
+## Installation
+
+### Arch Linux (AUR)
+If you are on Arch, you can build the package using the provided PKGBUILD in the arch-build directory:
+```bash
+git clone https://github.com/x1nx3r/Lazypub.git
+cd Lazypub/arch-build
+makepkg -si
+```
+
+### Debian / Ubuntu
+Download the latest .deb file from the Releases page and install it:
+```bash
+sudo apt install ./lazypub_0.1.2_amd64.deb
+```
+
+### Generic Linux (AppImage)
+Download the .AppImage from the Releases page, make it executable, and run it.
+
 ## Key Features
 
 - **Persistent Workspace Architecture**: Gone are the days of losing your progress because you closed the app. Import an EPUB into a dedicated folder, and all your HTML, CSS, and Glossary progress will be saved right there.
