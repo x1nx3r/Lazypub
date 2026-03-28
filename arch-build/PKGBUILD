@@ -19,3 +19,4 @@ package() {
   # Ensure the binary has executable permissions
   chmod +x "${pkgdir}/usr/bin/lazypub"
 }
+sha256sums=('9f1802ad0cbf0fdee0ba26f1f0c19bd4f92b0e7d687f6025d53156eb89eee750')
