@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-#testfolder
 testbook
+testbook# Arch Linux packaging
+arch-build/pkg/
+arch-build/src/
+arch-build/*.tar.*
+arch-build/*.deb
+
