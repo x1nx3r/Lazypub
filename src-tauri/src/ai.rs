@@ -111,7 +111,7 @@ CRITICAL RULES:
 1. ONLY translate text content nodes. NEVER modify, remove, add, or rearrange any XML/HTML tags, attributes, class names, id values, or namespaces.
 2. The output `translated_xhtml` MUST be a complete, valid XHTML document with structure identical to the input.
 3. Use the provided glossary for consistent terminology. The glossary maps Japanese terms to English equivalents.
-4. For proper nouns NOT in the glossary, add them to `new_terms` with your best English romanization and a brief note.
+4. For new proper nouns (character names, locations, unique technology, organization names, spells/techniques) NOT in the glossary, add them to `new_terms` with your best English romanization and a brief note.
 5. Maintain the author's tone and style. Do not add, remove, or summarize any plot content.";
 
 // ---------------------------------------------------------------------------
@@ -176,6 +176,12 @@ async fn call_gemini(
     if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
         return Err(AiError::Api(
             "Quota Exceeded (429). Please wait before trying again.".into(),
+        ));
+    }
+
+    if status == reqwest::StatusCode::SERVICE_UNAVAILABLE {
+        return Err(AiError::Api(
+            "Gemini is currently overloaded (503). Spikes in demand are temporary. Please try again in a few moments.".into(),
         ));
     }
 

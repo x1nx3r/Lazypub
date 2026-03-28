@@ -9,7 +9,9 @@ interface SettingsModalProps {
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState("");
   const [wikiUrl, setWikiUrl] = useState("https://ja.wikipedia.org/w/");
-  const [selectedModel, setSelectedModel] = useState("models/gemini-1.5-flash");
+  const [modelExtract, setModelExtract] = useState("models/gemini-1.5-flash");
+  const [modelTranslate, setModelTranslate] = useState("models/gemini-1.5-flash");
+  const [modelNormalize, setModelNormalize] = useState("models/gemini-1.5-flash");
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [develMode, setDevelMode] = useState(false);
   
@@ -21,13 +23,17 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       const store = await load("settings.json");
       const savedKey = await store.get<string>("gemini_api_key");
       const savedWiki = await store.get<string>("wiki_url");
-      const savedModel = await store.get<string>("gemini_model");
+      const savedExtract = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model");
+      const savedTranslate = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model");
+      const savedNormalize = await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model");
       const savedDevel = await store.get<boolean>("devel_mode");
       
       if (savedKey) setApiKey(savedKey);
       if (savedWiki) setWikiUrl(savedWiki);
-      if (savedModel) setSelectedModel(savedModel);
-      if (savedDevel !== null) setDevelMode(savedDevel);
+      if (savedExtract) setModelExtract(savedExtract);
+      if (savedTranslate) setModelTranslate(savedTranslate);
+      if (savedNormalize) setModelNormalize(savedNormalize);
+      if (typeof savedDevel === "boolean") setDevelMode(savedDevel);
     }
     loadSettings();
   }, []);
@@ -45,11 +51,6 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         develMode 
       });
       setAvailableModels(models);
-      
-      // Select the first one if we don't have one selected and models exist
-      if (models.length > 0 && !models.includes(selectedModel)) {
-        setSelectedModel(models[0]);
-      }
     } catch (e) {
       console.error("Failed to fetch models", e);
       alert(`Failed to fetch models: ${e}`);
@@ -64,7 +65,11 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       const store = await load("settings.json");
       await store.set("gemini_api_key", apiKey.trim());
       await store.set("wiki_url", wikiUrl.trim());
-      await store.set("gemini_model", selectedModel);
+      await store.set("gemini_model_extract", modelExtract);
+      await store.set("gemini_model_translate", modelTranslate);
+      await store.set("gemini_model_normalize", modelNormalize);
+      // Keep legacy for backward compatibility if needed by older code
+      await store.set("gemini_model", modelExtract); 
       await store.set("devel_mode", develMode);
       await store.save();
       onClose();
@@ -94,35 +99,61 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               placeholder="AIzaSy..."
               className="text-input"
             />
-            <p className="help-text">Your key is stored securely in your local AppData via Tauri Store. It is only sent directly to Google APIs.</p>
+            <p className="help-text">Your key is stored securely in your local AppData via Tauri Store.</p>
           </div>
 
           <div className="form-group">
-            <label htmlFor="model-select">Gemini Model Version 🤖</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select 
-                id="model-select"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="text-input"
-                style={{ flex: 1 }}
-              >
-                {availableModels.length === 0 && (
-                  <option value={selectedModel}>{selectedModel} (Unverified)</option>
-                )}
-                {availableModels.map(model => (
-                  <option key={model} value={model}>{model}</option>
-                ))}
-              </select>
-              <button 
-                className="btn btn--sm" 
-                onClick={handleFetchModels}
-                disabled={isFetchingModels || !apiKey}
-              >
-                {isFetchingModels ? "..." : "Fetch"}
-              </button>
-            </div>
-            <p className="help-text">Select the model you want to use for Entity Extraction and Reconciliation.</p>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ margin: 0 }}>Model Selections 🤖</label>
+                <button 
+                  className="btn btn--sm" 
+                  onClick={handleFetchModels}
+                  disabled={isFetchingModels || !apiKey}
+                >
+                  {isFetchingModels ? "Fetching..." : "🔄 Refresh Models List"}
+                </button>
+             </div>
+
+             <div className="model-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group">
+                  <label htmlFor="model-extract" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Entity Extraction</label>
+                  <select 
+                    id="model-extract"
+                    value={modelExtract}
+                    onChange={(e) => setModelExtract(e.target.value)}
+                    className="text-input"
+                  >
+                    {availableModels.length === 0 && <option value={modelExtract}>{modelExtract}</option>}
+                    {availableModels.map(model => <option key={model} value={model}>{model}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="model-translate" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Chapter Translation</label>
+                  <select 
+                    id="model-translate"
+                    value={modelTranslate}
+                    onChange={(e) => setModelTranslate(e.target.value)}
+                    className="text-input"
+                  >
+                    {availableModels.length === 0 && <option value={modelTranslate}>{modelTranslate}</option>}
+                    {availableModels.map(model => <option key={model} value={model}>{model}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label htmlFor="model-normalize" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Layout Normalization (Heavy Task)</label>
+                  <select 
+                    id="model-normalize"
+                    value={modelNormalize}
+                    onChange={(e) => setModelNormalize(e.target.value)}
+                    className="text-input"
+                  >
+                    {availableModels.length === 0 && <option value={modelNormalize}>{modelNormalize}</option>}
+                    {availableModels.map(model => <option key={model} value={model}>{model}</option>)}
+                  </select>
+                </div>
+             </div>
           </div>
 
           <div className="form-group">
@@ -135,7 +166,6 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               placeholder="https://ja.wikipedia.org/w/"
               className="text-input"
             />
-            <p className="help-text">Point this to the target Fandom/Wikipedia `api.php` base URL.</p>
           </div>
 
           <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

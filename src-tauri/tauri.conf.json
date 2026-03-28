@@ -16,7 +16,8 @@
         "width": 1400,
         "height": 900,
         "decorations": false,
-        "transparent": false
+        "transparent": false,
+        "theme": "Dark"
       }
     ],
     "security": {

@@ -122,7 +122,7 @@ function App() {
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
-      const model = await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const model = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
       const wikiUrl = await store.get<string>("wiki_url") || "https://ja.wikipedia.org/w/";
       const develMode = await store.get<boolean>("devel_mode") || false;
       
@@ -207,7 +207,7 @@ function App() {
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
-      const model = await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const model = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
       const develMode = await store.get<boolean>("devel_mode") || false;
 
       if (!apiKey) {
@@ -289,7 +289,7 @@ function App() {
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
-      const model = await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const model = await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
       const develMode = await store.get<boolean>("devel_mode") || false;
       
       if (!apiKey) {
