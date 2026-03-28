@@ -52,7 +52,7 @@ function App() {
       if (!selected) return;
 
       setIsLoading(true);
-      setLoadingMessage("📂 Opening EPUB...");
+      setLoadingMessage("Opening EPUB...");
       const result = await invoke<OpenResult>("open_epub", {
         path: selected,
       });
@@ -75,7 +75,7 @@ function App() {
   const handleSelectFile = useCallback(async (path: string) => {
     try {
       setIsLoading(true);
-      setLoadingMessage("📂 Reading file...");
+      setLoadingMessage("Reading file...");
       const content = await invoke<string>("read_file", {
         path,
       });
@@ -97,7 +97,7 @@ function App() {
   const handleSave = useCallback(async () => {
     if (!activeFile) return;
     setIsLoading(true);
-    setLoadingMessage("💾 Saving and refreshing preview...");
+    setLoadingMessage("Saving and refreshing preview...");
     try {
       await invoke("save_file", {
         path: activeFile,
@@ -118,7 +118,7 @@ function App() {
   const handleExtractEntities = useCallback(async () => {
     if (!activeFile || !chapterContent) return;
     setIsLoading(true);
-    setLoadingMessage("✨ Extracting entities and crawling wikis...");
+    setLoadingMessage("Extracting entities and crawling wikis...");
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
@@ -133,7 +133,7 @@ function App() {
       }
 
       console.log(`Extracting entities via Gemini (${model})...`);
-      setLoadingMessage("✨ Extracting entities via Gemini...");
+      setLoadingMessage("Extracting entities via Gemini...");
       const extracted = await invoke<string[]>("run_entity_extraction", {
         apiKey,
         model,
@@ -152,7 +152,7 @@ function App() {
           continue;
         }
 
-        setLoadingMessage(`🔍 Reconciling ${i + 1}/${extracted.length}: ${entity}...`);
+        setLoadingMessage(`Reconciling ${i + 1}/${extracted.length}: ${entity}...`);
         try {
           const term = await invoke<Term>("reconcile_term", {
              apiKey, model, wikiUrl, entity, develMode 
@@ -203,7 +203,7 @@ function App() {
   const handleTranslateChapter = useCallback(async () => {
     if (!activeFile) return;
     setIsLoading(true);
-    setLoadingMessage("🌐 Translating chapter with AI...");
+    setLoadingMessage("Translating chapter with AI...");
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
@@ -269,7 +269,7 @@ function App() {
     });
     if (!outputPath) return;
     setIsLoading(true);
-    setLoadingMessage("📦 Packaging EPUB...");
+    setLoadingMessage("Packaging EPUB...");
     try {
       await invoke("export_epub", { outputPath });
       alert(`Exported successfully to:\n${outputPath}`);
@@ -285,7 +285,7 @@ function App() {
   const handleNormalizeLayout = useCallback(async () => {
     if (!bookInfo) return;
     setIsLoading(true);
-    setLoadingMessage("🪄 Normalizing EPUB layout...");
+    setLoadingMessage("Normalizing EPUB layout...");
     try {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
@@ -308,7 +308,7 @@ function App() {
         return;
       }
 
-      setLoadingMessage("🧠 Asking Gemini to re-layout...");
+      setLoadingMessage("Asking Gemini to re-layout...");
       const newFiles = await invoke<LayoutFile[]>("normalize_layout_files", {
         apiKey,
         model,
@@ -323,7 +323,7 @@ function App() {
         return;
       }
 
-      setLoadingMessage(`💾 Applying ${newFiles.length} file changes...`);
+      setLoadingMessage(`Applying ${newFiles.length} file changes...`);
       for (const file of newFiles) {
         await invoke("save_file", { path: file.path, content: file.content });
       }
@@ -377,22 +377,22 @@ function App() {
             {activeFile !== null && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button className="btn btn--sm" onClick={handleNormalizeLayout} disabled={isLoading}>
-                  🪄 Normalize
+                  Normalize
                 </button>
                 {activeFile.match(/\.x?html?$/i) && (
                   <>
                     <button className="btn btn--sm" onClick={handleExtractEntities} disabled={isLoading}>
-                      ✨ Extract
+                      Extract
                     </button>
                     <button className="btn btn--sm btn--primary" onClick={handleTranslateChapter} disabled={isLoading}>
-                      🌐 Translate
+                      Translate
                     </button>
                   </>
                 )}
               </div>
             )}
             <button className="btn btn--icon" onClick={() => setIsSettingsOpen(true)} title="Settings">
-              ⚙️
+              Settings
             </button>
             {activeFile !== null && (
               <button 
@@ -407,7 +407,7 @@ function App() {
             </button>
             {bookInfo && (
               <button className="btn btn--sm btn--primary" onClick={handleExportEpub} disabled={isLoading}>
-                💾 Export
+                Export
               </button>
             )}
           </div>
@@ -472,13 +472,13 @@ function App() {
                   className={`editor-area__tab ${viewMode === "editor" ? "editor-area__tab--active" : ""}`}
                   onClick={() => setViewMode("editor")}
                 >
-                  📝 Source
+                  Source
                 </button>
                 <button 
                   className={`editor-area__tab ${viewMode === "preview" ? "editor-area__tab--active" : ""}`}
                   onClick={() => setViewMode("preview")}
                 >
-                  👁️ Preview
+                  Preview
                 </button>
               </div>
               <div className="editor-area__content">
@@ -495,13 +495,13 @@ function App() {
             </>
           ) : (
             <div className="empty-state">
-              <div className="empty-state__icon">📚</div>
+              <div className="empty-state__icon">EPUB</div>
               <h2 className="empty-state__title">No file selected</h2>
               <p className="empty-state__subtitle">
                 Select a chapter from the sidebar to start translating.
               </p>
               {!bookInfo && (
-                <button className="btn btn--primary" onClick={handleOpenEpub}>📂 Open EPUB</button>
+                <button className="btn btn--primary" onClick={handleOpenEpub}>Open EPUB</button>
               )}
             </div>
           )}

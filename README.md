@@ -17,7 +17,7 @@ Assuming you've actually managed to get an API key and haven't given up yet, her
 2.  **The Exorcism**: Click **🪄 Normalize Layout**. This sends the entire CSS and OPF structure to Gemini. It will rewrite them to be "normal" (i.e., readable by Epub.js and not a complete disaster). It saves you from 3 hours of manual Regex.
 3.  **The Harvest**: Open a chapter from the file tree. Click **✨ Extract Entities**. Gemini will scan the text for proper nouns, names, and places. It then crawls Japanese wikis to figure out who "That One Guy" actually is.
 4.  **The Audit**: Go to the **Glossary** tab. You'll see a bunch of "Pending" terms. Actually look at them. If the translation is wrong, fix it. Set them to **Approved**. Only approved terms are used to guide the translation, so if you skip this, don't complain when the protagonist's name changes three times in one paragraph.
-5.  **The Heavy Lifting**: Click **🌐 Translate**. Gemini takes your approved glossary and the raw XHTML. It translates the prose but leaves the tags alone (usually).
+5.  **The Heavy Lifting**: Click **🌐 Translate**. Gemini takes your approved glossary and the raw XHTML. It translates the prose but leaves the tags alone (usually). Also it could also adds other terms it found to the glossary so check them and approve them so the model doesn't forget it later.
 6.  **The Manual Labor**: The translated text replaces your editor content but **isn't saved yet**. Read it. If Gemini hallucinated a new character, fix it in the editor.
 7.  **The Committal**: Click **Save**. This updates the internal file tree and refreshes the **Preview** tab. You can now actually see what the page looks like.
 8.  **The Rinse and Repeat**: Do this for every chapter. Yes, all of them. AI is fast, but it doesn't has a "Translate Entire Book and Make me a Sandwich" button yet.
@@ -34,7 +34,7 @@ Since we aren't paying for your electricity, you'll need your own Google AI Stud
 
 ## Model Advice
 If you value your sanity and your wallet:
-*   **Use `models/gemini-3.1-flash`**: It's fast, it's basically free at low volumes, and it's plenty smart enough for this. 
+*   **Use `models/gemini-3.1-flash-lite`**: It's fast, it's basically free at low volumes, and it's plenty smart enough for this. 
 *   **Avoid the "Pro" models**: You won't have access to it anyway if you're on free tier
 *   **Track your usage** : You can track your usage on the same place you get your api from
 

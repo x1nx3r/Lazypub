@@ -19,7 +19,7 @@ function FileTreeItem({ node, level, activeFile, onSelectFile }: { node: FileNod
           onClick={() => setIsOpen(!isOpen)}
         >
           <span style={{ fontSize: "10px", width: "12px", textAlign: "center" }}>{isOpen ? "▼" : "▶"}</span>
-          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>📁 {node.name}</span>
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{node.name}</span>
         </div>
         {isOpen && node.children && (
           <div className="file-tree-children">
@@ -41,7 +41,7 @@ function FileTreeItem({ node, level, activeFile, onSelectFile }: { node: FileNod
   const isActive = activeFile === node.path;
   const isImage = node.name.match(/\.(jpg|jpeg|png|gif|svg)$/i);
   const isCss = node.name.match(/\.css$/i);
-  const icon = isImage ? "🖼️" : isCss ? "🎨" : "📄";
+  const icon = isImage ? "[IMG]" : isCss ? "[CSS]" : "[TXT]";
 
   return (
     <div 
@@ -61,7 +61,7 @@ function FileTreeItem({ node, level, activeFile, onSelectFile }: { node: FileNod
       }}
       onClick={() => onSelectFile(node.path)}
     >
-      <span style={{ fontSize: "14px" }}>{icon}</span>
+      <span style={{ fontSize: "11px", color: "var(--text-muted)", width: "32px" }}>{icon}</span>
       <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "13px" }}>{node.name}</span>
     </div>
   );

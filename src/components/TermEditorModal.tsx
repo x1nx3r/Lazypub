@@ -31,7 +31,7 @@ export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps)
         
         <div className="modal__body">
           <div className="form-group">
-            <label>Original Japanese Term 🇯🇵</label>
+            <label>Original Japanese Term</label>
             <input 
               type="text" 
               value={term.ja} 
@@ -42,7 +42,7 @@ export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps)
           </div>
 
           <div className="form-group">
-            <label htmlFor="en-translation">English Translation 🇺🇸</label>
+            <label htmlFor="en-translation">English Translation</label>
             <input 
               id="en-translation"
               type="text" 
@@ -55,7 +55,7 @@ export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps)
           </div>
 
           <div className="form-group">
-            <label htmlFor="term-notes">Context / Notes 📝</label>
+            <label htmlFor="term-notes">Context / Notes</label>
             <textarea 
               id="term-notes"
               value={notes} 
@@ -67,7 +67,7 @@ export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps)
           </div>
 
           <div className="form-group">
-            <label>Verification Status ✅</label>
+            <label>Verification Status</label>
             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', margin: 0, fontWeight: 'normal' }}>
                 <input 

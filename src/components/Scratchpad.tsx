@@ -85,7 +85,7 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
       <div className="scratchpad__header">
         <h2>Glossary</h2>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">↻</button>
+          <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">Refresh</button>
         </div>
       </div>
 

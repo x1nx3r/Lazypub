@@ -90,7 +90,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         
         <div className="modal__body">
           <div className="form-group">
-            <label htmlFor="api-key">Google AI Studio API Key (Gemini) 🔑</label>
+            <label htmlFor="api-key">Google AI Studio API Key (Gemini)</label>
             <input 
               id="api-key"
               type="password" 
@@ -104,13 +104,13 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
           <div className="form-group">
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label style={{ margin: 0 }}>Model Selections 🤖</label>
+                <label style={{ margin: 0 }}>Model Selections</label>
                 <button 
                   className="btn btn--sm" 
                   onClick={handleFetchModels}
                   disabled={isFetchingModels || !apiKey}
                 >
-                  {isFetchingModels ? "Fetching..." : "🔄 Refresh Models List"}
+                  {isFetchingModels ? "Fetching..." : "Refresh Models List"}
                 </button>
              </div>
 
@@ -157,7 +157,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="wiki-url">Target MediaWiki URL 🌐</label>
+            <label htmlFor="wiki-url">Target MediaWiki URL</label>
             <input 
               id="wiki-url"
               type="text" 
