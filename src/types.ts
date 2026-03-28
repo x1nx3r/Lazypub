@@ -19,6 +19,7 @@ export interface OpenResult {
   language: string;
   spine: SpineItem[];
   file_tree: FileNode[];
+  opf_dir: string;
 }
 
 export interface Term {

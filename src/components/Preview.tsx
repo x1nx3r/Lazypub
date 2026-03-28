@@ -1,82 +1,145 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from "react";
 import ePub, { Rendition } from "epubjs";
 
 interface PreviewProps {
   epubBuffer: ArrayBuffer | null;
   activeFile: string | null;
+  opfDir: string | null;
+  onLocationChange?: (info: { index: number; total: number; label: string }) => void;
+  onFileChange?: (path: string) => void;
 }
 
-export function Preview({ epubBuffer, activeFile }: PreviewProps) {
+export interface PreviewHandle {
+  next: () => void;
+  prev: () => void;
+  zoom: (delta: number) => void;
+  jumpTo: (href: string) => void;
+}
+
+export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ epubBuffer, activeFile, opfDir, onLocationChange, onFileChange }, ref) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
+  const [_fontSize, setFontSize] = useState(100);
+
+  // Helper to normalize path relative to OPF dir
+  const normalizePath = (path: string) => {
+    if (!opfDir) return path;
+    const prefix = opfDir.endsWith('/') ? opfDir : `${opfDir}/`;
+    if (path.startsWith(prefix)) {
+      return path.substring(prefix.length);
+    }
+    return path;
+  };
+
+  // Helper to restore absolute ZIP path from OPF-relative path
+  const restorePath = (path: string) => {
+    if (!opfDir) return path;
+    const prefix = opfDir.endsWith('/') ? opfDir : `${opfDir}/`;
+    return prefix + path;
+  };
+
+  const displayFile = (path: string) => {
+    if (!renditionRef.current) return;
+    const normalized = normalizePath(path);
+    renditionRef.current.display(normalized).catch(() => {
+      // Fallback to original if normalized fails
+      renditionRef.current?.display(path).catch(err => {
+        console.warn("EpubJS navigation failed completely:", err);
+      });
+    });
+  };
+
+  useImperativeHandle(ref, () => ({
+    next: () => renditionRef.current?.next(),
+    prev: () => renditionRef.current?.prev(),
+    zoom: (delta: number) => {
+      setFontSize(prev => {
+        const next = Math.min(Math.max(prev + delta, 50), 250);
+        renditionRef.current?.themes.fontSize(`${next}%`);
+        return next;
+      });
+    },
+    jumpTo: (href: string) => {
+      displayFile(href);
+    }
+  }));
 
   useEffect(() => {
     if (!epubBuffer || !viewerRef.current) return;
 
-    console.log("Loading EpubJS with buffer size:", epubBuffer.byteLength);
-
-    // Load book from memory buffer
     const book = ePub(epubBuffer);
-    
-    // Clear old rendition
     viewerRef.current.innerHTML = "";
 
     const rendition = book.renderTo(viewerRef.current, {
       width: "100%",
       height: "100%",
       spread: "none",
+      flow: "paginated",
+      allowScriptedContent: true,
     });
     renditionRef.current = rendition;
 
+    // Track location changes
+    rendition.on("relocated", (location: any) => {
+      // Check if file has changed (autonext)
+      if (onFileChange && location.start.href) {
+        const zipPath = restorePath(location.start.href);
+        // We compare with the prop directly to avoid loops
+        if (zipPath !== activeFile) {
+          onFileChange(zipPath);
+        }
+      }
+
+      if (onLocationChange && book.locations) {
+        const locs = book.locations as any;
+        const index = locs.locationFromCfi(location.start.cfi);
+        const total = locs.length();
+        const label = location.start.displayed.page || (typeof index === 'number' ? index + 1 : 1);
+        onLocationChange({ index: Number(index), total, label: label.toString() });
+      }
+    });
+
     book.ready.then(() => {
-      console.log("EpubJS Book is ready! Spine loaded.");
-      // If we have an active file selected in the sidebar, try to navigate there
-      if (activeFile) {
-        console.log("Attempting to display active file:", activeFile);
-        rendition.display(activeFile).catch((e) => {
-          console.error("Could not display active file in Epub.js:", e);
-          rendition.display();
-        });
+      const spine = (book.spine as any);
+      const items = spine.items || (spine.spineItems);
+      console.log("EpubJS Spine Items:", items ? items.map((i: any) => i.href) : "unknown");
+      
+      return book.locations.generate(1024);
+    }).then(() => {
+      if (activeFile && activeFile.match(/\.x?html?$/i)) {
+        displayFile(activeFile);
       } else {
-        console.log("No active file, displaying default.");
         rendition.display();
       }
     }).catch(err => {
-      console.error("EpubJS failed to parse the buffer:", err);
+      console.error("EpubJS initialization error:", err);
     });
 
     return () => {
       book.destroy();
     };
-  }, [epubBuffer]); // Rebuild the viewer entirely when the zip buffer changes (on Save)
+  }, [epubBuffer]);
 
   useEffect(() => {
     if (renditionRef.current && activeFile) {
-      renditionRef.current.display(activeFile).catch(err => {
-        console.warn("Could not navigate to file in Epubjs", err);
-      });
+      const isRenderable = activeFile.match(/\.x?html?$/i);
+      if (isRenderable) {
+        displayFile(activeFile);
+      }
     }
-  }, [activeFile]); // Only do lightweight navigation when clicking sidebar files
-
-  const handlePrev = () => renditionRef.current?.prev();
-  const handleNext = () => renditionRef.current?.next();
+  }, [activeFile]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-      <div style={{ display: 'flex', gap: '8px', padding: '8px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', justifyContent: 'center' }}>
-        <button className="btn" onClick={handlePrev}>← Prev Page</button>
-        <button className="btn" onClick={handleNext}>Next Page →</button>
-      </div>
-      <div
-        ref={viewerRef}
-        className="preview-frame"
-        style={{
-          flex: 1,
-          backgroundColor: "#fff", // E-readers are typically white
-          color: "#000",
-          overflow: "hidden"
-        }}
-      />
-    </div>
+    <div
+      ref={viewerRef}
+      className="preview-frame"
+      style={{
+        flex: 1,
+        backgroundColor: "#fff",
+        color: "#000",
+        overflow: "hidden",
+        paddingBottom: "100px" // More space for the toolbox
+      }}
+    />
   );
-}
+});

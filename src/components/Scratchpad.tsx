@@ -84,20 +84,18 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
     <div className="scratchpad">
       <div className="scratchpad__header">
         <h2>Glossary</h2>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">Refresh</button>
-        </div>
+        <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">Refresh</button>
       </div>
 
       {pendingTerms.length > 0 && (
         <div className="scratchpad__batch-actions">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="flex items-center gap-2">
             <input 
               type="checkbox" 
               checked={selectedIds.size === pendingTerms.length && pendingTerms.length > 0}
               onChange={handleToggleSelectAll}
             />
-            <span className="text-sm text-muted">{selectedIds.size} selected</span>
+            <span className="text-sm text-secondary">{selectedIds.size} selected</span>
           </div>
           {selectedIds.size > 0 && (
             <button className="btn btn--sm btn--primary" onClick={handleBatchApprove} disabled={isSaving}>

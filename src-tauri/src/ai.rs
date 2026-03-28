@@ -349,7 +349,18 @@ pub async fn normalize_layout_files(
         files: Vec<crate::epub::LayoutFile>,
     }
 
-    let parsed: LayoutResult = serde_json::from_str(&response_text)?;
+    let mut parsed: LayoutResult = serde_json::from_str(&response_text)?;
+    // Post-process to beautify XHTML/XML/OPF but skip CSS
+    for file in &mut parsed.files {
+        let p = file.path.to_lowercase();
+        if p.ends_with(".xhtml")
+            || p.ends_with(".opf")
+            || p.ends_with(".xml")
+            || p.ends_with(".html")
+        {
+            file.content = crate::epub::beautify_xhtml(&file.content);
+        }
+    }
     Ok(parsed.files)
 }
 
@@ -403,6 +414,8 @@ pub async fn translate_chapter(
     )
     .await?;
 
-    let parsed: TranslationResult = serde_json::from_str(&response_text)?;
+    let mut parsed: TranslationResult = serde_json::from_str(&response_text)?;
+    // Auto-format the resulting XHTML
+    parsed.translated_xhtml = crate::epub::beautify_xhtml(&parsed.translated_xhtml);
     Ok(parsed)
 }

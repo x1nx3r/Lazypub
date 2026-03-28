@@ -38,26 +38,45 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     loadSettings();
   }, []);
 
-  const handleFetchModels = async () => {
-    if (!apiKey.trim()) {
-      alert("Please enter your API Key first!");
-      return;
-    }
+  const handleFetchModels = async (keyToUse?: string) => {
+    const key = keyToUse || apiKey.trim();
+    if (!key || !key.startsWith("AIzaSy")) return;
     
     setIsFetchingModels(true);
     try {
       const models = await invoke<string[]>("list_ai_models", { 
-        apiKey: apiKey.trim(),
+        apiKey: key,
         develMode 
       });
       setAvailableModels(models);
     } catch (e) {
       console.error("Failed to fetch models", e);
-      alert(`Failed to fetch models: ${e}`);
     } finally {
       setIsFetchingModels(false);
     }
   };
+
+  // Auto-fetch on mount if API key exists
+  useEffect(() => {
+    async function init() {
+      const store = await load("settings.json");
+      const savedKey = await store.get<string>("gemini_api_key");
+      if (savedKey && savedKey.startsWith("AIzaSy")) {
+        handleFetchModels(savedKey);
+      }
+    }
+    init();
+  }, []);
+
+  // Debounced fetch when API key changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (apiKey.startsWith("AIzaSy") && availableModels.length === 0) {
+        handleFetchModels();
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [apiKey]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -103,20 +122,20 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           </div>
 
           <div className="form-group">
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label style={{ margin: 0 }}>Model Selections</label>
+             <div className="flex justify-between items-center mb-2">
+                <label className="mb-0">Model Selections</label>
                 <button 
                   className="btn btn--sm" 
-                  onClick={handleFetchModels}
+                  onClick={() => handleFetchModels()}
                   disabled={isFetchingModels || !apiKey}
                 >
                   {isFetchingModels ? "Fetching..." : "Refresh Models List"}
                 </button>
              </div>
 
-             <div className="model-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="form-group">
-                  <label htmlFor="model-extract" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Entity Extraction</label>
+             <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="form-group mb-0">
+                  <label htmlFor="model-extract" className="text-xs font-bold uppercase tracking-wider text-muted mb-1">Entity Extraction</label>
                   <select 
                     id="model-extract"
                     value={modelExtract}
@@ -128,8 +147,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="model-translate" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Chapter Translation</label>
+                <div className="form-group mb-0">
+                  <label htmlFor="model-translate" className="text-xs font-bold uppercase tracking-wider text-muted mb-1">Chapter Translation</label>
                   <select 
                     id="model-translate"
                     value={modelTranslate}
@@ -141,8 +160,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   </select>
                 </div>
 
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label htmlFor="model-normalize" className="help-text" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Layout Normalization (Heavy Task)</label>
+                <div className="form-group mb-0" style={{ gridColumn: 'span 2' }}>
+                  <label htmlFor="model-normalize" className="text-xs font-bold uppercase tracking-wider text-muted mb-1">Layout Normalization (Heavy Task)</label>
                   <select 
                     id="model-normalize"
                     value={modelNormalize}
@@ -156,7 +175,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
              </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group border-t border-subtle pt-4 mt-4">
             <label htmlFor="wiki-url">Target MediaWiki URL</label>
             <input 
               id="wiki-url"
@@ -168,21 +187,20 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
             />
           </div>
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="form-group flex items-center gap-2 mb-0">
             <input 
               id="devel-mode"
               type="checkbox" 
               checked={develMode} 
               onChange={(e) => setDevelMode(e.target.checked)}
             />
-            <label htmlFor="devel-mode" style={{ margin: 0 }}>Enable Developer Mode (Verbose Logging)</label>
+            <label htmlFor="devel-mode" className="mb-0">Enable Developer Mode (Verbose Logging)</label>
           </div>
           {develMode && (
-            <p className="help-text" style={{ marginTop: '-12px', marginBottom: '20px', paddingLeft: '24px' }}>
+            <p className="help-text px-6">
               When enabled, the Rust backend will print all raw API requests and responses (Gemini, MediaWiki) to the terminal.
             </p>
           )}
-
         </div>
 
         <div className="modal__footer">

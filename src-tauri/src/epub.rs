@@ -1,9 +1,9 @@
 use quick_xml::events::Event;
-use quick_xml::Reader;
+use quick_xml::{Reader, Writer};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::io::Read;
+use std::io::{Cursor, Read};
 use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 use thiserror::Error;
@@ -49,12 +49,9 @@ impl Serialize for EpubError {
 
 /// Represents an unpacked EPUB project on disk.
 pub struct EpubProject {
-    /// The temp directory holding the extracted EPUB files.
-    /// Kept alive so the directory isn't deleted until the project is dropped.
-    pub _temp_dir: TempDir,
-    /// Root path where EPUB contents are extracted.
+    /// Root path where EPUB contents are extracted (the persistent project folder).
     pub root_path: PathBuf,
-    /// Path to the original .epub file that was opened.
+    /// Path to the original .epub file that was opened (optional, if we want to remember it).
     pub source_path: PathBuf,
     /// Parsed book manifest from the OPF file.
     pub manifest: BookManifest,
@@ -113,13 +110,12 @@ pub struct FileNode {
     pub children: Option<Vec<FileNode>>,
 }
 
-/// Unpack an .epub file into a temporary directory and parse its manifest.
-pub fn unpack_epub(epub_path: &Path) -> Result<EpubProject, EpubError> {
+/// Unpack an .epub file into a specified directory and parse its manifest.
+pub fn import_epub(epub_path: &Path, output_dir: &Path) -> Result<EpubProject, EpubError> {
     let file = fs::File::open(epub_path)?;
     let mut archive = ZipArchive::new(file)?;
 
-    let temp_dir = TempDir::new()?;
-    let root = temp_dir.path().to_path_buf();
+    let root = output_dir.to_path_buf();
 
     // Extract all files
     for i in 0..archive.len() {
@@ -153,9 +149,29 @@ pub fn unpack_epub(epub_path: &Path) -> Result<EpubProject, EpubError> {
     let manifest = parse_opf(&opf_full, &opf_dir)?;
 
     Ok(EpubProject {
-        _temp_dir: temp_dir,
         root_path: root,
         source_path: epub_path.to_path_buf(),
+        manifest,
+    })
+}
+
+/// Load an existing EPUB project from an extracted directory.
+pub fn load_project(project_dir: &Path) -> Result<EpubProject, EpubError> {
+    let root = project_dir.to_path_buf();
+
+    // Locate the OPF file via META-INF/container.xml
+    let opf_relative = find_opf_path(&root)?;
+    let opf_full = root.join(&opf_relative);
+    let opf_dir = Path::new(&opf_relative)
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+
+    let manifest = parse_opf(&opf_full, &opf_dir)?;
+
+    Ok(EpubProject {
+        root_path: root,
+        source_path: PathBuf::new(), // We might not know the original .epub
         manifest,
     })
 }
@@ -347,7 +363,11 @@ pub fn get_layout_files(project: &EpubProject) -> Result<Vec<LayoutFile>, EpubEr
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-pub fn build_file_tree(root_path: &Path, current_path: &Path) -> Result<Vec<FileNode>, EpubError> {
+pub fn build_file_tree(
+    root_path: &Path,
+    current_path: &Path,
+    spine_map: &HashMap<String, usize>,
+) -> Result<Vec<FileNode>, EpubError> {
     let mut nodes = Vec::new();
     if !current_path.is_dir() {
         return Ok(nodes);
@@ -367,7 +387,7 @@ pub fn build_file_tree(root_path: &Path, current_path: &Path) -> Result<Vec<File
         let is_dir = path.is_dir();
 
         let children = if is_dir {
-            Some(build_file_tree(root_path, &path)?)
+            Some(build_file_tree(root_path, &path, spine_map)?)
         } else {
             None
         };
@@ -381,7 +401,17 @@ pub fn build_file_tree(root_path: &Path, current_path: &Path) -> Result<Vec<File
     }
 
     // Sort directories first, then alphabetically
-    nodes.sort_by(|a, b| b.is_dir.cmp(&a.is_dir).then_with(|| a.name.cmp(&b.name)));
+    // Sort:
+    // 1. Directories first
+    // 2. Files in spine first (by index)
+    // 3. Alphabetical fallback
+    nodes.sort_by(|a, b| {
+        b.is_dir.cmp(&a.is_dir).then_with(|| {
+            let a_idx = spine_map.get(&a.path).cloned().unwrap_or(usize::MAX);
+            let b_idx = spine_map.get(&b.path).cloned().unwrap_or(usize::MAX);
+            a_idx.cmp(&b_idx).then_with(|| a.name.cmp(&b.name))
+        })
+    });
 
     Ok(nodes)
 }
@@ -451,6 +481,31 @@ fn find_opf_path(epub_root: &Path) -> Result<String, EpubError> {
     }
 
     Err(EpubError::NoOpfFound)
+}
+
+/// Simple XHTML/XML beautifier using quick-xml's built-in indentation.
+pub fn beautify_xhtml(input: &str) -> String {
+    let mut reader = Reader::from_str(input);
+    reader.config_mut().trim_text(true);
+    let mut writer = Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2);
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Eof) => break,
+            Ok(event) => {
+                // We wrap the write in a result check to handle potential encoding issues
+                if writer.write_event(event).is_err() {
+                    return input.to_string();
+                }
+            }
+            Err(_) => return input.to_string(),
+        }
+        buf.clear();
+    }
+
+    let result = writer.into_inner().into_inner();
+    String::from_utf8(result).unwrap_or_else(|_| input.to_string())
 }
 
 /// Parse the OPF file to extract metadata, manifest items, and spine order.

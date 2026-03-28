@@ -1,7 +1,7 @@
 [package]
 name = "lazypub"
-version = "0.1.0"
-description = "AI-Powered EPUB Localization Studio"
+version = "0.1.1"
+description = "A Tauri-based EPUB processing and translation suite"
 authors = ["you"]
 edition = "2021"
 

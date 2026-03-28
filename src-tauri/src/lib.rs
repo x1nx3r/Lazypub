@@ -49,29 +49,67 @@ pub struct OpenResult {
     pub language: String,
     pub spine: Vec<epub::SpineItem>,
     pub file_tree: Vec<epub::FileNode>,
+    pub opf_dir: String,
 }
 
 // ---------------------------------------------------------------------------
 // Tauri IPC Commands
 // ---------------------------------------------------------------------------
 
-/// Open an EPUB file from the given path, unpack it, and return the manifest.
-#[tauri::command]
-fn open_epub(path: String, state: State<AppState>) -> Result<OpenResult, String> {
-    let epub_path = PathBuf::from(&path);
+fn generate_open_result(project: &epub::EpubProject) -> OpenResult {
+    let mut spine_map = std::collections::HashMap::new();
+    for item in &project.manifest.spine {
+        if let Some(manifest_item) = project.manifest.items.get(&item.idref) {
+            let zip_path = if project.manifest.opf_dir.is_empty() {
+                manifest_item.href.clone()
+            } else {
+                format!("{}/{}", project.manifest.opf_dir, manifest_item.href)
+            };
+            spine_map.insert(zip_path, item.index);
+        }
+    }
 
-    let project = epub::unpack_epub(&epub_path).map_err(|e| e.to_string())?;
+    let file_tree = epub::build_file_tree(&project.root_path, &project.root_path, &spine_map)
+        .unwrap_or_default();
 
-    let file_tree =
-        epub::build_file_tree(&project.root_path, &project.root_path).unwrap_or_default();
-
-    let result = OpenResult {
+    OpenResult {
         title: project.manifest.title.clone(),
         author: project.manifest.author.clone(),
         language: project.manifest.language.clone(),
         spine: project.manifest.spine.clone(),
         file_tree,
-    };
+        opf_dir: project.manifest.opf_dir.clone(),
+    }
+}
+
+/// Import an EPUB file into a persistent directory.
+#[tauri::command]
+fn import_epub(
+    path: String,
+    output_dir: String,
+    state: State<AppState>,
+) -> Result<OpenResult, String> {
+    let epub_path = PathBuf::from(&path);
+    let out_path = PathBuf::from(&output_dir);
+
+    let project = epub::import_epub(&epub_path, &out_path).map_err(|e| e.to_string())?;
+
+    let result = generate_open_result(&project);
+
+    let mut state_project = state.project.lock().map_err(|e| e.to_string())?;
+    *state_project = Some(project);
+
+    Ok(result)
+}
+
+/// Load an existing EPUB project from a persistent directory.
+#[tauri::command]
+fn load_project(project_dir: String, state: State<AppState>) -> Result<OpenResult, String> {
+    let dir_path = PathBuf::from(&project_dir);
+
+    let project = epub::load_project(&dir_path).map_err(|e| e.to_string())?;
+
+    let result = generate_open_result(&project);
 
     let mut state_project = state.project.lock().map_err(|e| e.to_string())?;
     *state_project = Some(project);
@@ -150,7 +188,11 @@ fn read_resource(
     let file_full_path = project.root_path.join(&active_file);
     let file_dir = file_full_path.parent().unwrap_or(&project.root_path);
 
-    let resource_path = file_dir.join(&relative_path);
+    let resource_path = if relative_path.is_empty() {
+        file_full_path
+    } else {
+        file_dir.join(&relative_path)
+    };
 
     let bytes = std::fs::read(&resource_path).map_err(|e| {
         format!(
@@ -185,6 +227,11 @@ fn read_resource(
 }
 
 #[tauri::command]
+fn beautify_xhtml(content: String) -> String {
+    epub::beautify_xhtml(&content)
+}
+
+#[tauri::command]
 fn get_epub_buffer(state: State<AppState>) -> Result<Vec<u8>, String> {
     let project = state.project.lock().map_err(|e| e.to_string())?;
     let project = project
@@ -202,6 +249,22 @@ fn export_epub(output_path: String, state: State<AppState>) -> Result<(), String
         .ok_or_else(|| "No EPUB currently open".to_string())?;
 
     epub::repackage_epub(project, std::path::Path::new(&output_path)).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn save_asset(path: String, dest: String, state: State<AppState>) -> Result<(), String> {
+    let project = state.project.lock().map_err(|e| e.to_string())?;
+    let project = project
+        .as_ref()
+        .ok_or_else(|| "No EPUB currently open".to_string())?;
+
+    let src = project.root_path.join(&path);
+    if !src.exists() {
+        return Err(format!("Source asset not found: {}", path));
+    }
+
+    std::fs::copy(&src, &dest).map_err(|e| format!("Failed to copy asset: {}", e))?;
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -359,7 +422,8 @@ pub fn run() {
             project: Mutex::new(None),
         })
         .invoke_handler(tauri::generate_handler![
-            open_epub,
+            import_epub,
+            load_project,
             list_chapters,
             read_chapter,
             save_chapter,
@@ -378,6 +442,8 @@ pub fn run() {
             get_epub_buffer,
             translate_chapter,
             export_epub,
+            beautify_xhtml,
+            save_asset,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

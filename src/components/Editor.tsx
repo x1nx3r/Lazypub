@@ -21,7 +21,7 @@ export function Editor({ content, language = "xml", onChange }: EditorProps) {
         lineNumbers: "on",
         wordWrap: "on",
         scrollBeyondLastLine: false,
-        padding: { top: 12 },
+        padding: { top: 12, bottom: 80 },
         renderWhitespace: "selection",
         bracketPairColorization: { enabled: true },
         automaticLayout: true,
