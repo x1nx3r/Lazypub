@@ -48,5 +48,5 @@ jobs:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: "Lazypub v__VERSION__"
           releaseBody: "See the assets below for the latest version."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
