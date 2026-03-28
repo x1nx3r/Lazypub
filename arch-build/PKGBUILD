@@ -1,7 +1,7 @@
 # Maintainer: x1nx3r <x1nx3r@github.com>
 pkgname=lazypub-bin
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="AI-powered lightweight EPUB translation and layout normalization workbench (Binary release)"
 arch=('x86_64')
 url="https://github.com/x1nx3r/Lazypub"
@@ -9,14 +9,14 @@ license=('unknown')
 depends=('gtk3' 'webkit2gtk' 'libsoup3' 'libappindicator-gtk3' 'librsvg' 'fuse2')
 options=('!strip')
 source=("https://github.com/x1nx3r/Lazypub/releases/download/v${pkgver}/lazypub_${pkgver}_amd64.deb")
-sha256sums=('SKIP') # Update this with the real hash once you have the release
+sha256sums=('SKIP')
 
 package() {
-  # Extract the data.tar.xz from the .deb
-  ar x lazypub_${pkgver}_amd64.deb data.tar.xz
-  tar -xvf data.tar.xz -C "${pkgdir}"
+  # Extract the data.tar.gz from the .deb
+  # (Tauri v2 uses .gz or .zst instead of .xz)
+  ar x lazypub_${pkgver}_amd64.deb data.tar.gz
+  tar -xvf data.tar.gz -C "${pkgdir}"
   
   # Ensure the binary has executable permissions
   chmod +x "${pkgdir}/usr/bin/lazypub"
 }
-sha256sums=('9f1802ad0cbf0fdee0ba26f1f0c19bd4f92b0e7d687f6025d53156eb89eee750')
