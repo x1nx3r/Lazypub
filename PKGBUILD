@@ -1,0 +1,21 @@
+# Maintainer: x1nx3r <x1nx3r@github.com>
+pkgname=lazypub-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="AI-powered lightweight EPUB translation and layout normalization workbench (Binary release)"
+arch=('x86_64')
+url="https://github.com/x1nx3r/Lazypub"
+license=('unknown')
+depends=('gtk3' 'webkit2gtk' 'libsoup3' 'libappindicator-gtk3' 'librsvg' 'fuse2')
+options=('!strip')
+source=("https://github.com/x1nx3r/Lazypub/releases/download/v${pkgver}/lazypub_${pkgver}_amd64.deb")
+sha256sums=('SKIP') # Update this with the real hash once you have the release
+
+package() {
+  # Extract the data.tar.xz from the .deb
+  ar x lazypub_${pkgver}_amd64.deb data.tar.xz
+  tar -xvf data.tar.xz -C "${pkgdir}"
+  
+  # Ensure the binary has executable permissions
+  chmod +x "${pkgdir}/usr/bin/lazypub"
+}
