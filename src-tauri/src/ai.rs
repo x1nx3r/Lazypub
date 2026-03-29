@@ -375,6 +375,7 @@ pub struct NewTerm {
 pub struct TranslationResult {
     pub translated_xhtml: String,
     pub new_terms: Vec<NewTerm>,
+    #[serde(default)]
     pub errors: Vec<String>,
 }
 
