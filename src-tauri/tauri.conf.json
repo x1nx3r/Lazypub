@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "lazypub",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "identifier": "com.x1nx3r.lazypub",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -21,12 +21,12 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' tauri: 'unsafe-inline' 'unsafe-eval' http://localhost:*; img-src 'self' blob: data: tauri: http://localhost:*; frame-src 'self' blob: data:; child-src 'self' blob: data:; style-src 'self' 'unsafe-inline' tauri: http://localhost:*;"
+      "csp": null
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["deb", "appimage", "nsis", "msi", "dmg", "app"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

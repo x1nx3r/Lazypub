@@ -1,6 +1,6 @@
 [package]
 name = "lazypub"
-version = "0.1.5"
+version = "0.1.6"
 description = "A Tauri-based EPUB processing and translation suite"
 license = "MIT"
 authors = ["you"]
