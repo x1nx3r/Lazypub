@@ -4,6 +4,10 @@ Congratulations. You found a way to avoid actually reading Japanese while preten
 
 With the new persistent architecture, Lazypub has moved past the "volatile memory" phase of its life. Projects are now actual folders on your hard drive, just like a real developer would have.
 
+![Project Dashboard](assets/ss1.png)
+![Editor View](assets/ss2.png)
+![Glossary Management](assets/ss3.png)
+
 ## Installation
 
 ### Arch Linux (AUR)
@@ -27,7 +31,6 @@ Download the .AppImage from the Releases page, make it executable, and run it.
 
 - **Persistent Workspace Architecture**: Gone are the days of losing your progress because you closed the app. Import an EPUB into a dedicated folder, and all your HTML, CSS, and Glossary progress will be saved right there.
 - **Recent Projects Dashboard**: The home screen tracks your last 10 project folders. One click and you're back to where you left off, assuming you haven't deleted the folder in a fit of rage.
-- **Sarcastic Thinking Engine**: Since AI API calls take time, we've implemented a state-of-the-art "Thinking" system that provides deadpan, sarcastic feedback about the state of the software's simulated thought process while the models actually do the work.
 - **XHTML Normalization**: AI fixes the messy CSS and OPF files that some publishers thought were a good idea. It's like a hazmat suit for your EPUB's structure.
 - **Entity Extraction & Reconcile**: Automatically finds character names and locations, then crawls Japanese wikis to figure out who "That One Guy" actually is.
 - **Glossary Persistence**: Your glossary (glossary.json) lives in your project root. Version control it, edit it manually, or just look at it to feel productive.
@@ -71,3 +74,8 @@ bun run tauri dev
 ```
 
 Good luck. You'll need it.
+
+## Known Issues
+
+- **Preview tab not working on Windows**: Currently, the preview tab may fail to render correctly on Windows systems. I don't know what's the cause and i don't have a windows pc on hand so i'm not currently thinking about it. If you have any ideas why and interested in contributing, you can open an issue or just submit a pr. Hell you could just fork this and make your own windows-optimized version. 
+- **Untested Mac build**: The application has not been thoroughly tested on macOS; use with caution.
