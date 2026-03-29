@@ -44,4 +44,5 @@ export interface NewTerm {
 export interface TranslationResult {
   translated_xhtml: string;
   new_terms: NewTerm[];
+  errors: string[];
 }

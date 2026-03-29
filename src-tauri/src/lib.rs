@@ -227,8 +227,12 @@ fn read_resource(
 }
 
 #[tauri::command]
-fn beautify_xhtml(content: String) -> String {
-    epub::beautify_xhtml(&content)
+fn beautify_xhtml(content: String, strip_ruby: bool) -> String {
+    let mut processed = content;
+    if strip_ruby {
+        processed = epub::strip_ruby(&processed);
+    }
+    epub::beautify_xhtml(&processed)
 }
 
 #[tauri::command]

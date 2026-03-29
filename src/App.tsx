@@ -13,6 +13,9 @@ import { TermEditorModal } from "./components/TermEditorModal";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { OpenResult, Term, FileNode, LayoutFile, TranslationResult } from "./types";
 import { load } from "@tauri-apps/plugin-store";
+import { XhtmlDebugger } from "./components/XhtmlDebugger";
+import "./components/XhtmlDebugger.css";
+import packageJson from "../package.json";
 import "./App.css";
 import logoImg from "./assets/logo.svg?url";
 import { getThinkingMsg } from "./thinkingPhrases";
@@ -45,13 +48,15 @@ function App() {
   // --- State ---
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [bookInfo, setBookInfo] = useState<OpenResult | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("editor");
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [chapterContent, setChapterContent] = useState<string>("");
   const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("editor");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [isDebuggerOpen, setIsDebuggerOpen] = useState(false);
+  const [debuggerResult, setDebuggerResult] = useState<TranslationResult | null>(null);
   const [editorDirty, setEditorDirty] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -230,11 +235,14 @@ function App() {
   const handleBeautify = useCallback(async () => {
     if (!chapterContent) return;
     try {
-      const beautified = await invoke<string>("beautify_xhtml", { content: chapterContent });
+      setIsLoading(true);
+      const beautified = await invoke<string>("beautify_xhtml", { content: chapterContent, stripRuby: true });
       setChapterContent(beautified);
       setEditorDirty(true);
     } catch (err) {
       console.error("Format error:", err);
+    } finally {
+      setIsLoading(false);
     }
   }, [chapterContent]);
 
@@ -390,33 +398,13 @@ function App() {
         develMode,
       });
 
-      // Load the translated content into the editor (user reviews before saving)
-      setChapterContent(result.translated_xhtml);
-      setEditorDirty(true);
-
-      // Push new terms to the glossary as "pending"
-      if (result.new_terms.length > 0) {
-        const currentGlossary = await invoke<Term[]>("get_glossary");
-        const timestamp = Date.now();
-        const newTerms: Term[] = result.new_terms.map((t, i) => ({
-          id: `term_${timestamp}_${i}`,
-          ja: t.ja,
-          en: t.en,
-          notes: t.notes ?? null,
-          status: "pending" as const,
-        }));
-        // Only add terms not already in the glossary
-        const merged = [
-          ...currentGlossary,
-          ...newTerms.filter(nt => !currentGlossary.some(g => g.ja === nt.ja)),
-        ];
-        await invoke("update_glossary", { glossary: merged });
-        await emit("glossary_updated");
-        setLoadingMessage("");
-        alert(`Translation complete! ${result.new_terms.length} new terms added to Scratchpad. Review the translation in the editor, then click Save.`);
+      // If there are errors (even if auto-fixed), show the debugger
+      if (result.errors.length > 0) {
+        setDebuggerResult(result);
+        setIsDebuggerOpen(true);
+        // We don't apply the content yet, wait for user to "Accept" in the debugger
       } else {
-        setLoadingMessage("");
-        alert("Translation complete! Review the translation in the editor, then click Save.");
+        applyTranslationResult(result);
       }
     } catch (err) {
       console.error("Translation failed:", err);
@@ -426,6 +414,35 @@ function App() {
       setIsLoading(false);
     }
   }, [activeFile]);
+
+  const applyTranslationResult = useCallback(async (result: TranslationResult) => {
+    // Load the translated content into the editor (user reviews before saving)
+    setChapterContent(result.translated_xhtml);
+    setEditorDirty(true);
+
+    // Push new terms to the glossary as "pending"
+    if (result.new_terms.length > 0) {
+      const currentGlossary = await invoke<Term[]>("get_glossary");
+      const timestamp = Date.now();
+      const newTerms: Term[] = result.new_terms.map((t, i) => ({
+        id: `term_${timestamp}_${i}`,
+        ja: t.ja,
+        en: t.en,
+        notes: t.notes ?? null,
+        status: "pending" as const,
+      }));
+      // Only add terms not already in the glossary
+      const merged = [
+        ...currentGlossary,
+        ...newTerms.filter(nt => !currentGlossary.some(g => g.ja === nt.ja)),
+      ];
+      await invoke("update_glossary", { glossary: merged });
+      await emit("glossary_updated");
+      alert(`Translation complete! ${result.new_terms.length} new terms added to Scratchpad. Review the translation in the editor, then click Save.`);
+    } else {
+      alert("Translation complete! Review the translation in the editor, then click Save.");
+    }
+  }, []);
 
   const handleExportEpub = useCallback(async () => {
     if (!bookInfo) return;
@@ -524,7 +541,7 @@ function App() {
         <div className="titlebar__left">
           <img src={logoImg} alt="Lazypub Logo" className="titlebar__icon" />
           <span className="titlebar__logo">Lazypub</span>
-          <span className="titlebar__version">v0.1.0</span>
+          <span className="titlebar__version">v{packageJson.version}</span>
         </div>
 
         {bookInfo && (
@@ -780,6 +797,31 @@ function App() {
           )}
         </div>
       </div>
+      {isSettingsOpen && (
+        <SettingsModal 
+          onClose={() => setIsSettingsOpen(false)} 
+        />
+      )}
+
+      {isDebuggerOpen && debuggerResult && (
+        <XhtmlDebugger
+          content={debuggerResult.translated_xhtml}
+          errors={debuggerResult.errors}
+          onClose={() => {
+            setIsDebuggerOpen(false);
+            setDebuggerResult(null);
+          }}
+          onAccept={() => {
+            applyTranslationResult(debuggerResult);
+            setIsDebuggerOpen(false);
+            setDebuggerResult(null);
+          }}
+        />
+      )}
+
+      {isLoading && (
+        <LoadingOverlay message={loadingMessage} />
+      )}
     </div>
   );
 }

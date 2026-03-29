@@ -111,7 +111,7 @@ CRITICAL RULES:
 1. ONLY translate text content nodes. NEVER modify, remove, add, or rearrange any XML/HTML tags, attributes, class names, id values, or namespaces.
 2. The output `translated_xhtml` MUST be a complete, valid XHTML document with structure identical to the input.
 3. Use the provided glossary for consistent terminology. The glossary maps Japanese terms to English equivalents.
-4. For new proper nouns (character names, locations, unique technology, organization names, spells/techniques) NOT in the glossary, add them to `new_terms` with your best English romanization and a brief note.
+4. For new background important or terminology relevant to the series (character names, locations, unique technology, organization names, spells/techniques) NOT in the glossary, add them to `new_terms` with your best English romanization and a brief note containing it's meaning and relevance to the plot.
 5. Maintain the author's tone and style. Do not add, remove, or summarize any plot content.";
 
 // ---------------------------------------------------------------------------
@@ -375,6 +375,7 @@ pub struct NewTerm {
 pub struct TranslationResult {
     pub translated_xhtml: String,
     pub new_terms: Vec<NewTerm>,
+    pub errors: Vec<String>,
 }
 
 pub async fn translate_chapter(
@@ -415,7 +416,32 @@ pub async fn translate_chapter(
     .await?;
 
     let mut parsed: TranslationResult = serde_json::from_str(&response_text)?;
-    // Auto-format the resulting XHTML
-    parsed.translated_xhtml = crate::epub::beautify_xhtml(&parsed.translated_xhtml);
+
+    // 1. Initial Validation
+    let mut errors = crate::epub::validate_xhtml(&parsed.translated_xhtml);
+
+    // 2. Attempt Auto-fix if errors exist
+    if !errors.is_empty() {
+        crate::devel_log(
+            devel_mode,
+            &format!(
+                "!!! [AI] XHTML Validation Failed. Attempting Auto-fix. Errors: {:?}",
+                errors
+            ),
+        );
+        let fixed = crate::epub::auto_fix_xhtml(&parsed.translated_xhtml);
+        let new_errors = crate::epub::validate_xhtml(&fixed);
+
+        if new_errors.len() < errors.len() || new_errors.is_empty() {
+            parsed.translated_xhtml = fixed;
+            errors = new_errors;
+        }
+    }
+
+    // 3. Final Cleanup: Strip ruby (AI often flips languages while keeping tags) and Beautify
+    let cleaned = crate::epub::strip_ruby(&parsed.translated_xhtml);
+    parsed.translated_xhtml = crate::epub::beautify_xhtml(&cleaned);
+    parsed.errors = errors;
+
     Ok(parsed)
 }

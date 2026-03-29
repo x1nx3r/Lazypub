@@ -1,0 +1,790 @@
+{
+  "models/gemini-3-flash-preview": {
+    "0.1": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 3.0017123222351074,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 25,
+          "totalTokenCount": 505,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ],
+          "thoughtsTokenCount": 380
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A sword-wielding Servant class and the specific identity of the heroine Artoria Pendragon in the Fate series."
+        },
+        "latency": 2.2726733684539795,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 43,
+          "totalTokenCount": 496,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ],
+          "thoughtsTokenCount": 260
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body { writing-mode: horizontal-tb; -epub-writing-mode: horizontal-tb; } .title { font-size: 2em; margin-top: 10%; }"
+            }
+          ]
+        },
+        "latency": 19.568256616592407,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 54,
+          "totalTokenCount": 3886,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ],
+          "thoughtsTokenCount": 3655
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: Night of Fate</h1><p>Under the moonlight, he quietly stepped forward.</p><p>\u201cI ask of you. Are you my Master?\u201d</p></body></html>",
+          "new_terms": [
+            {
+              "ja": "\u904b\u547d\u306e\u591c",
+              "en": "Night of Fate",
+              "notes": "The title of the first chapter, referring to the night the protagonist's life changes."
+            }
+          ]
+        },
+        "latency": 264.358469247818,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 138,
+          "totalTokenCount": 63429,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ],
+          "thoughtsTokenCount": 62912
+        }
+      }
+    },
+    "0.4": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 3.1337578296661377,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 42,
+          "totalTokenCount": 495,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ],
+          "thoughtsTokenCount": 353
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "One of the seven standard Servant classes summoned for the Holy Grail War, typically representing a heroic spirit of the sword."
+        },
+        "latency": 2.809497117996216,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 35,
+          "totalTokenCount": 511,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ],
+          "thoughtsTokenCount": 283
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body {\n    writing-mode: horizontal-tb;\n    -epub-writing-mode: horizontal-tb;\n}\n.title {\n    font-size: 2em;\n    margin-top: 10%;\n}"
+            }
+          ]
+        },
+        "latency": 14.289070844650269,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 66,
+          "totalTokenCount": 3022,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ],
+          "thoughtsTokenCount": 2779
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head><title>Chapter 1</title></head>\n<body>\n<h1>Chapter 1: Night of Fate</h1>\n<p>Under the moonlight, he walked forward quietly.</p>\n<p>\u201cI ask of you. Are you my Master?\u201d</p>\n</body>\n</html>",
+          "new_terms": [
+            {
+              "ja": "\u904b\u547d\u306e\u591c",
+              "en": "Night of Fate",
+              "notes": "The title of the chapter and a significant event in the story."
+            }
+          ]
+        },
+        "latency": 17.224191904067993,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 147,
+          "totalTokenCount": 3581,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ],
+          "thoughtsTokenCount": 3055
+        }
+      }
+    },
+    "0.7": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 2.367065668106079,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 25,
+          "totalTokenCount": 425,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ],
+          "thoughtsTokenCount": 300
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A main heroine of Fate/stay night and a Saber-class Servant summoned in the Fourth and Fifth Holy Grail Wars."
+        },
+        "latency": 2.6944048404693604,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 42,
+          "totalTokenCount": 504,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ],
+          "thoughtsTokenCount": 269
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body { writing-mode: horizontal-tb; -epub-writing-mode: horizontal-tb; } .title { font-size: 2em; margin-top: 10%; }"
+            }
+          ]
+        },
+        "latency": 9.816851615905762,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 58,
+          "totalTokenCount": 1935,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ],
+          "thoughtsTokenCount": 1700
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head><title>Chapter 1</title></head>\n<body>\n<h1>Chapter 1: Night of Fate</h1>\n<p>Under the moonlight, he walked forward quietly.</p>\n<p>\u2018I ask of you. Are you my Master?\u2019</p>\n</body>\n</html>",
+          "new_terms": [
+            {
+              "ja": "\u904b\u547d\u306e\u591c",
+              "en": "Night of Fate",
+              "notes": "The title of the first chapter and a significant night in the narrative."
+            }
+          ]
+        },
+        "latency": 30.987305402755737,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 157,
+          "totalTokenCount": 6614,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ],
+          "thoughtsTokenCount": 6078
+        }
+      }
+    },
+    "1.0": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 3.1683130264282227,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 25,
+          "totalTokenCount": 513,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ],
+          "thoughtsTokenCount": 388
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A Heroic Spirit of the Saber class summoned as a Servant for the Holy Grail War, primarily referring to the character Artoria Pendragon in Fate/stay night."
+        },
+        "latency": 2.636826276779175,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 52,
+          "totalTokenCount": 506,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ],
+          "thoughtsTokenCount": 261
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body { writing-mode: horizontal-tb; -epub-writing-mode: horizontal-tb; } .title { font-size: 2em; margin-top: 10%; }"
+            }
+          ]
+        },
+        "latency": 7.030047178268433,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 54,
+          "totalTokenCount": 1465,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ],
+          "thoughtsTokenCount": 1234
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: Night of Fate</h1><p>Amidst the moonlight, he quietly stepped forward.</p><p>\u201cI ask of you. Are you my Master?\u201d</p></body></html>",
+          "new_terms": [
+            {
+              "ja": "\u904b\u547d\u306e\u591c",
+              "en": "Night of Fate",
+              "notes": "The title of the chapter and a significant turning point in the story."
+            }
+          ]
+        },
+        "latency": 30.6165668964386,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 135,
+          "totalTokenCount": 6204,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ],
+          "thoughtsTokenCount": 5690
+        }
+      }
+    }
+  },
+  "models/gemini-3.1-flash-lite-preview": {
+    "0.1": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 1.4056894779205322,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 49,
+          "totalTokenCount": 149,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ]
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A powerful Servant class hero summoned to participate in the Holy Grail War, specifically referring to Artoria Pendragon in the Fate series."
+        },
+        "latency": 5.038923978805542,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 45,
+          "totalTokenCount": 238,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ]
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body { writing-mode: horizontal-tb; -epub-writing-mode: horizontal-tb; } .title { font-size: 2em; margin-top: 10%; }"
+            }
+          ]
+        },
+        "latency": 1.8410890102386475,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 76,
+          "totalTokenCount": 253,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ]
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: The Night of Fate</h1><p>Under the moonlight, he walked forward quietly.</p><p>\"I ask of you. Are you my Master?\"</p></body></html>",
+          "new_terms": []
+        },
+        "latency": 1.4954259395599365,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 116,
+          "totalTokenCount": 495,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ]
+        }
+      }
+    },
+    "0.4": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 1.2047436237335205,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 49,
+          "totalTokenCount": 149,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ]
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A powerful Heroic Spirit summoned as a Servant of the Saber class in the Holy Grail War."
+        },
+        "latency": 0.8376879692077637,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 37,
+          "totalTokenCount": 230,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ]
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body { writing-mode: horizontal-tb; -epub-writing-mode: horizontal-tb; } .title { font-size: 2em; margin-top: 10%; }"
+            }
+          ]
+        },
+        "latency": 1.569870948791504,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 76,
+          "totalTokenCount": 253,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ]
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: The Night of Fate</h1><p>Under the moonlight, he walked forward quietly.</p><p>\"I ask of you. Are you my Master?\"</p></body></html>",
+          "new_terms": []
+        },
+        "latency": 1.7936420440673828,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 116,
+          "totalTokenCount": 495,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ]
+        }
+      }
+    },
+    "0.7": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 1.4592599868774414,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 30,
+          "totalTokenCount": 130,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ]
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A Servant class character and one of the primary heroines of the Fate franchise, specifically the legendary King Arthur."
+        },
+        "latency": 1.7313323020935059,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 40,
+          "totalTokenCount": 233,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ]
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body {writing-mode: horizontal-tb;-epub-writing-mode: horizontal-tb;}.title {font-size: 2em;margin-top: 10%;}"
+            }
+          ]
+        },
+        "latency": 3.092346668243408,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 74,
+          "totalTokenCount": 251,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ]
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: The Night of Fate</h1><p>Under the moonlight, he walked forward quietly.</p><p>\"I ask of you. Are you my Master?\"</p></body></html>",
+          "new_terms": []
+        },
+        "latency": 1.886659860610962,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 116,
+          "totalTokenCount": 495,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ]
+        }
+      }
+    },
+    "1.0": {
+      "extract": {
+        "result": {
+          "entities": [
+            "\u51ac\u6728\u5e02",
+            "\u885b\u5bae\u5207\u55e3",
+            "\u30a2\u30a4\u30f3\u30c4\u30d9\u30eb\u30f3",
+            "\u8056\u676f\u6226\u4e89",
+            "\u30bb\u30a4\u30d0\u30fc"
+          ]
+        },
+        "latency": 1.6418540477752686,
+        "tokens": {
+          "promptTokenCount": 100,
+          "candidatesTokenCount": 30,
+          "totalTokenCount": 130,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 100
+            }
+          ]
+        }
+      },
+      "reconcile": {
+        "result": {
+          "en": "Saber",
+          "notes": "A powerful Servant-class warrior and a main protagonist in the Fate franchise, typically manifesting as the legendary King Arthur."
+        },
+        "latency": 1.3143839836120605,
+        "tokens": {
+          "promptTokenCount": 193,
+          "candidatesTokenCount": 41,
+          "totalTokenCount": 234,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 193
+            }
+          ]
+        }
+      },
+      "layout": {
+        "result": {
+          "files": [
+            {
+              "path": "style.css",
+              "content": "body {writing-mode: horizontal-tb;-epub-writing-mode: horizontal-tb;}.title {font-size: 2em;margin-top: 10%;}"
+            }
+          ]
+        },
+        "latency": 1.5494277477264404,
+        "tokens": {
+          "promptTokenCount": 177,
+          "candidatesTokenCount": 74,
+          "totalTokenCount": 251,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 177
+            }
+          ]
+        }
+      },
+      "translate": {
+        "result": {
+          "translated_xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>Chapter 1</title></head><body><h1>Chapter 1: The Night of Fate</h1><p>As the moonlight shone down, he moved forward quietly.</p><p>\"I ask of you. Are you my Master?\"</p></body></html>",
+          "new_terms": [
+            {
+              "ja": "\u904b\u547d\u306e\u591c",
+              "en": "The Night of Fate",
+              "notes": "The title of the first chapter."
+            }
+          ]
+        },
+        "latency": 2.7177412509918213,
+        "tokens": {
+          "promptTokenCount": 379,
+          "candidatesTokenCount": 160,
+          "totalTokenCount": 539,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 379
+            }
+          ]
+        }
+      }
+    }
+  },
+  "models/gemini-3.1-flash-image-preview": {
+    "0.1": {
+      "extract": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 6.238400626s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"6s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.2536041736602783
+      },
+      "reconcile": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 5.840559706s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"5s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.3475008010864258
+      },
+      "layout": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 5.685271189s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"5s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.15668177604675293
+      },
+      "translate": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 5.543025885s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"5s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1351184844970703
+      }
+    },
+    "0.4": {
+      "extract": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 3.398173161s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"3s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1493997573852539
+      },
+      "reconcile": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 3.2413996s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"3s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.15697884559631348
+      },
+      "layout": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 3.078868964s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"3s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.16071629524230957
+      },
+      "translate": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 2.928406726s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"2s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1477518081665039
+      }
+    },
+    "0.7": {
+      "extract": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 756.750479ms.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"0s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.16594719886779785
+      },
+      "reconcile": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 619.005747ms.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"0s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1351451873779297
+      },
+      "layout": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 466.062859ms.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"0s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.15262627601623535
+      },
+      "translate": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 314.353488ms.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"0s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.15266823768615723
+      }
+    },
+    "1.0": {
+      "extract": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 58.143921839s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"58s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1650407314300537
+      },
+      "reconcile": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 57.984897992s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"57s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.1551194190979004
+      },
+      "layout": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 57.829318043s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.1-flash-image\",\n              \"location\": \"global\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"57s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.15454816818237305
+      },
+      "translate": {
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-flash-image\\nPlease retry in 57.572432622s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\",\n            \"quotaId\": \"GenerateContentInputTokensPerModelPerMinute-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          },\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.1-flash-image\"\n            }\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"57s\"\n      }\n    ]\n  }\n}\n",
+        "latency": 0.2630801200866699
+      }
+    }
+  }
+}

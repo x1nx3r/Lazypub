@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{Cursor, Read};
 use std::path::{Path, PathBuf};
-use tempfile::TempDir;
 use thiserror::Error;
 use zip::ZipArchive;
 
@@ -486,7 +485,8 @@ fn find_opf_path(epub_root: &Path) -> Result<String, EpubError> {
 /// Simple XHTML/XML beautifier using quick-xml's built-in indentation.
 pub fn beautify_xhtml(input: &str) -> String {
     let mut reader = Reader::from_str(input);
-    reader.config_mut().trim_text(true);
+    reader.config_mut().trim_text(false);
+    reader.config_mut().check_end_names = false; // More lenient
     let mut writer = Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2);
     let mut buf = Vec::new();
 
@@ -494,7 +494,6 @@ pub fn beautify_xhtml(input: &str) -> String {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Eof) => break,
             Ok(event) => {
-                // We wrap the write in a result check to handle potential encoding issues
                 if writer.write_event(event).is_err() {
                     return input.to_string();
                 }
@@ -502,6 +501,209 @@ pub fn beautify_xhtml(input: &str) -> String {
             Err(_) => return input.to_string(),
         }
         buf.clear();
+    }
+
+    let result = writer.into_inner().into_inner();
+    String::from_utf8(result).unwrap_or_else(|_| input.to_string())
+}
+
+/// Strip `<ruby>`, `<rt>`, and `<rp>` tags from XHTML, preserving base text.
+pub fn strip_ruby(input: &str) -> String {
+    let mut reader = Reader::from_str(input);
+    reader.config_mut().trim_text(false);
+    reader.config_mut().check_end_names = false; // More lenient
+    let mut writer = Writer::new(Cursor::new(Vec::new()));
+    let mut buf = Vec::new();
+    let mut skip_depth = 0;
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) => {
+                let name = e.name();
+                let name_bytes = name.as_ref().to_ascii_lowercase();
+                if name_bytes == b"rt" || name_bytes == b"rp" {
+                    skip_depth += 1;
+                } else if name_bytes == b"ruby" {
+                    // Add a space to differentiate terms
+                    if skip_depth == 0 {
+                        let _ = writer.write_event(Event::Text(
+                            quick_xml::events::BytesText::from_escaped(" "),
+                        ));
+                    }
+                } else {
+                    if skip_depth == 0 {
+                        let _ = writer.write_event(Event::Start(e.clone()));
+                    }
+                }
+            }
+            Ok(Event::End(ref e)) => {
+                let name = e.name();
+                let name_bytes = name.as_ref().to_ascii_lowercase();
+                if name_bytes == b"rt" || name_bytes == b"rp" {
+                    if skip_depth > 0 {
+                        skip_depth -= 1;
+                    }
+                } else if name_bytes == b"ruby" {
+                    // Skip end tag
+                } else {
+                    if skip_depth == 0 {
+                        let _ = writer.write_event(Event::End(e.clone()));
+                    }
+                }
+            }
+            Ok(Event::Empty(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::Empty(e.clone()));
+                }
+            }
+            Ok(Event::Text(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::Text(e.clone()));
+                }
+            }
+            Ok(Event::Comment(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::Comment(e.clone()));
+                }
+            }
+            Ok(Event::CData(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::CData(e.clone()));
+                }
+            }
+            Ok(Event::Decl(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::Decl(e.clone()));
+                }
+            }
+            Ok(Event::PI(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::PI(e.clone()));
+                }
+            }
+            Ok(Event::DocType(ref e)) => {
+                if skip_depth == 0 {
+                    let _ = writer.write_event(Event::DocType(e.clone()));
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(_) => return input.to_string(),
+        }
+        buf.clear();
+    }
+
+    let result = writer.into_inner().into_inner();
+    String::from_utf8(result).unwrap_or_else(|_| input.to_string())
+}
+
+/// Validate XHTML structure and return a list of error messages.
+pub fn validate_xhtml(input: &str) -> Vec<String> {
+    let mut reader = Reader::from_str(input);
+    reader.config_mut().trim_text(true);
+    let mut buf = Vec::new();
+    let mut errors = Vec::new();
+    let mut tag_stack = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) => {
+                tag_stack.push(String::from_utf8_lossy(e.name().as_ref()).to_string());
+            }
+            Ok(Event::End(ref e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+                if let Some(last) = tag_stack.pop() {
+                    if last != name {
+                        errors.push(format!(
+                            "Mismatched tag: expected </{}>, found </{}>",
+                            last, name
+                        ));
+                    }
+                } else {
+                    errors.push(format!("Unexpected closing tag: </{}>", name));
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(e) => {
+                errors.push(format!("XML Parse Error: {}", e));
+                break;
+            }
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    while let Some(tag) = tag_stack.pop() {
+        errors.push(format!("Unclosed tag: <{}>", tag));
+    }
+
+    errors
+}
+
+/// Attempt to auto-fix common XHTML issues (unclosed tags, missing namespaces).
+pub fn auto_fix_xhtml(input: &str) -> String {
+    let mut reader = Reader::from_str(input);
+    reader.config_mut().trim_text(true);
+    let mut writer = Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2);
+    let mut buf = Vec::new();
+    let mut tag_stack = Vec::new();
+
+    // 1. First pass: Re-serialize while keeping track of the stack
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) => {
+                let name = e.name().as_ref().to_vec();
+                tag_stack.push(name.clone());
+                let _ = writer.write_event(Event::Start(e.clone()));
+            }
+            Ok(Event::End(ref e)) => {
+                let name = e.name().as_ref().to_vec();
+                if let Some(pos) = tag_stack.iter().rposition(|t| t == &name) {
+                    // Close all tags above this one in the stack
+                    while tag_stack.len() > pos + 1 {
+                        if let Some(to_close) = tag_stack.pop() {
+                            let _ =
+                                writer.write_event(Event::End(quick_xml::events::BytesEnd::new(
+                                    String::from_utf8_lossy(&to_close),
+                                )));
+                        }
+                    }
+                    tag_stack.pop(); // Pop the matching tag
+                    let _ = writer.write_event(Event::End(e.clone()));
+                }
+                // If tag not in stack, ignore unexpected closing tag
+            }
+            Ok(Event::Empty(ref e)) => {
+                let _ = writer.write_event(Event::Empty(e.clone()));
+            }
+            Ok(Event::Text(ref e)) => {
+                let _ = writer.write_event(Event::Text(e.clone()));
+            }
+            Ok(Event::CData(ref e)) => {
+                let _ = writer.write_event(Event::CData(e.clone()));
+            }
+            Ok(Event::Comment(ref e)) => {
+                let _ = writer.write_event(Event::Comment(e.clone()));
+            }
+            Ok(Event::Decl(ref e)) => {
+                let _ = writer.write_event(Event::Decl(e.clone()));
+            }
+            Ok(Event::PI(ref e)) => {
+                let _ = writer.write_event(Event::PI(e.clone()));
+            }
+            Ok(Event::DocType(ref e)) => {
+                let _ = writer.write_event(Event::DocType(e.clone()));
+            }
+            Ok(Event::Eof) => break,
+            Err(_) => break, // Stop at first error and just close what we have
+        }
+        buf.clear();
+    }
+
+    // 2. Close any remaining tags in the stack
+    while let Some(to_close) = tag_stack.pop() {
+        let _ = writer.write_event(Event::End(quick_xml::events::BytesEnd::new(
+            String::from_utf8_lossy(&to_close),
+        )));
     }
 
     let result = writer.into_inner().into_inner();
@@ -641,6 +843,7 @@ fn parse_opf(opf_path: &Path, opf_dir: &str) -> Result<BookManifest, EpubError> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
 
     #[test]
     fn test_parse_container_xml() {
