@@ -1,6 +1,6 @@
 # Maintainer: x1nx3r <x1nx3r@github.com>
 pkgname=lazypub-bin
-pkgver=0.1.5
+pkgver=0.1.6
 pkgrel=1
 pkgdesc="AI-powered lightweight EPUB translation and layout normalization workbench (Binary release)"
 arch=('x86_64')
