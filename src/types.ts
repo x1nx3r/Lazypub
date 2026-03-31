@@ -20,6 +20,7 @@ export interface OpenResult {
   spine: SpineItem[];
   file_tree: FileNode[];
   opf_dir: string;
+  project_dir: string;
 }
 
 export interface Term {

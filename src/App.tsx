@@ -52,7 +52,6 @@ function App() {
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [chapterContent, setChapterContent] = useState<string>("");
-  const [epubBuffer, setEpubBuffer] = useState<ArrayBuffer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [isDebuggerOpen, setIsDebuggerOpen] = useState(false);
@@ -140,9 +139,6 @@ function App() {
       setActiveFile(null);
       setChapterContent("");
       setEditorDirty(false);
-      
-      const buffer = await invoke<number[]>("get_epub_buffer");
-      setEpubBuffer(new Uint8Array(buffer).buffer);
 
       saveRecentProject(result.title || "UntitledBook", outputDir as string);
     } catch (err) {
@@ -182,9 +178,6 @@ function App() {
       setActiveFile(null);
       setChapterContent("");
       setEditorDirty(false);
-      
-      const buffer = await invoke<number[]>("get_epub_buffer");
-      setEpubBuffer(new Uint8Array(buffer).buffer);
 
       saveRecentProject(result.title || "Untitled", targetPath);
     } catch (err) {
@@ -256,9 +249,6 @@ function App() {
         content: chapterContent,
       });
       setEditorDirty(false);
-
-      const buffer = await invoke<number[]>("get_epub_buffer");
-      setEpubBuffer(new Uint8Array(buffer).buffer);
     } catch (err) {
       console.error("Failed to save file:", err);
     } finally {
@@ -511,9 +501,6 @@ function App() {
       for (const file of newFiles) {
         await invoke("save_file", { path: file.path, content: file.content });
       }
-      
-      const buffer = await invoke<number[]>("get_epub_buffer");
-      setEpubBuffer(new Uint8Array(buffer).buffer);
 
       alert(`Successfully full-replaced ${newFiles.length} layout files!`);
 
@@ -642,7 +629,7 @@ function App() {
                 ) : (
                   <Preview 
                     ref={previewRef}
-                    epubBuffer={epubBuffer} 
+                    projectDir={bookInfo ? bookInfo.project_dir : null} 
                     activeFile={activeFile} 
                     opfDir={bookInfo ? bookInfo.opf_dir : null}
                     onLocationChange={setPreviewLocation}

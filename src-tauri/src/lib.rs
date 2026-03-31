@@ -50,6 +50,7 @@ pub struct OpenResult {
     pub spine: Vec<epub::SpineItem>,
     pub file_tree: Vec<epub::FileNode>,
     pub opf_dir: String,
+    pub project_dir: String,
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +80,7 @@ fn generate_open_result(project: &epub::EpubProject) -> OpenResult {
         spine: project.manifest.spine.clone(),
         file_tree,
         opf_dir: project.manifest.opf_dir.clone(),
+        project_dir: project.root_path.to_string_lossy().to_string(),
     }
 }
 
@@ -233,16 +235,6 @@ fn beautify_xhtml(content: String, strip_ruby: bool) -> String {
         processed = epub::strip_ruby(&processed);
     }
     epub::beautify_xhtml(&processed)
-}
-
-#[tauri::command]
-fn get_epub_buffer(state: State<AppState>) -> Result<Vec<u8>, String> {
-    let project = state.project.lock().map_err(|e| e.to_string())?;
-    let project = project
-        .as_ref()
-        .ok_or_else(|| "No EPUB currently open".to_string())?;
-
-    epub::repackage_to_buffer(project).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -443,7 +435,6 @@ pub fn run() {
             update_glossary,
             get_layout_files,
             normalize_layout_files,
-            get_epub_buffer,
             translate_chapter,
             export_epub,
             beautify_xhtml,

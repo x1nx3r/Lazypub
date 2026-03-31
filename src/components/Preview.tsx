@@ -1,8 +1,10 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from "react";
 import ePub, { Rendition } from "epubjs";
 
+import { convertFileSrc } from "@tauri-apps/api/core";
+
 interface PreviewProps {
-  epubBuffer: ArrayBuffer | null;
+  projectDir: string | null;
   activeFile: string | null;
   opfDir: string | null;
   onLocationChange?: (info: { index: number; total: number; label: string }) => void;
@@ -16,7 +18,7 @@ export interface PreviewHandle {
   jumpTo: (href: string) => void;
 }
 
-export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ epubBuffer, activeFile, opfDir, onLocationChange, onFileChange }, ref) => {
+export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, activeFile, opfDir, onLocationChange, onFileChange }, ref) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const [_fontSize, setFontSize] = useState(100);
@@ -65,9 +67,17 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ epubBuffer, ac
   }));
 
   useEffect(() => {
-    if (!epubBuffer || !viewerRef.current) return;
+    if (!projectDir || !viewerRef.current) return;
 
-    const book = ePub(epubBuffer);
+    let normalizedPath = projectDir.replace(/\\/g, '/');
+    let safeUrl = convertFileSrc(normalizedPath);
+    
+    // Ensure URL has trailing slash so epubjs treats it as a directory root
+    if (!safeUrl.endsWith('/')) {
+        safeUrl += '/';
+    }
+
+    const book = ePub(safeUrl);
     viewerRef.current.innerHTML = "";
 
     const rendition = book.renderTo(viewerRef.current, {
@@ -118,7 +128,7 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ epubBuffer, ac
     return () => {
       book.destroy();
     };
-  }, [epubBuffer]);
+  }, [projectDir]);
 
   useEffect(() => {
     if (renditionRef.current && activeFile) {
