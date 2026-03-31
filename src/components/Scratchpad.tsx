@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
+import { load } from "@tauri-apps/plugin-store";
 import { Term } from "../types";
 
 interface ScratchpadProps {
   onTermClick: (term: Term) => void;
+  onDeleteTerm: (id: string) => void;
+  onAddTerm: () => void;
   onRequestReconciliation: () => void;
 }
 
-export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadProps) {
+export function Scratchpad({ onTermClick, onDeleteTerm, onAddTerm, onRequestReconciliation }: ScratchpadProps) {
   const [terms, setTerms] = useState<Term[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [targetLanguage, setTargetLanguage] = useState("English");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,9 +31,16 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
   };
 
   useEffect(() => {
+    const loadSettings = async () => {
+      const store = await load("settings.json");
+      const lang = await store.get<string>("target_language") || "English";
+      setTargetLanguage(lang);
+    };
+    loadSettings();
     fetchGlossary();
     const unlisten = listen("glossary_updated", () => {
       fetchGlossary();
+      loadSettings();
     });
     return () => {
       unlisten.then(f => f());
@@ -83,8 +94,18 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
   return (
     <div className="scratchpad">
       <div className="scratchpad__header">
-        <h2>Glossary</h2>
-        <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">Refresh</button>
+        <div className="flex flex-col">
+          <h2 className="mb-0">Glossary</h2>
+          <span className="text-xs text-secondary">{targetLanguage} Target</span>
+        </div>
+        <div className="flex gap-1">
+          <button className="btn btn--sm" onClick={onAddTerm} title="Add Manual Term">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <button className="btn btn--sm" onClick={fetchGlossary} title="Refresh">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          </button>
+        </div>
       </div>
 
       {pendingTerms.length > 0 && (
@@ -136,8 +157,15 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
                       />
                       <div className="term-item__content">
                         <div className="term-item__ja">{term.ja}</div>
-                        <div className="term-item__en">{term.en || "—"}</div>
+                        <div className="term-item__en">{term.en || "?" }</div>
                       </div>
+                      <button 
+                         className="term-item__delete" 
+                         onClick={(e) => { e.stopPropagation(); onDeleteTerm(term.id); }}
+                         title="Delete Term"
+                      >
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -155,6 +183,13 @@ export function Scratchpad({ onTermClick, onRequestReconciliation }: ScratchpadP
                       <div className="term-item__ja">{term.ja}</div>
                       <div className="term-item__en">{term.en}</div>
                     </div>
+                    <button 
+                       className="term-item__delete" 
+                       onClick={(e) => { e.stopPropagation(); onDeleteTerm(term.id); }}
+                       title="Delete Term"
+                    >
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                   </div>
                 ))}
               </div>

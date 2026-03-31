@@ -28,7 +28,7 @@ impl Serialize for AiError {
 // Prompts & Schemas
 // ---------------------------------------------------------------------------
 
-const EXTRACTION_SCHEMA: &str = r#"{
+const EXTRACTION_SCHEMA: &str = r###"{
   "type": "object",
   "properties": {
     "entities": {
@@ -38,22 +38,29 @@ const EXTRACTION_SCHEMA: &str = r#"{
     }
   },
   "required": ["entities"]
-}"#;
+}"###;
 
 const EXTRACTION_PROMPT: &str = "Extract all proper nouns (character names, locations, unique technology, organization names, spells/techniques) from the following Japanese text. Return only the raw Japanese terms as a JSON array of strings.";
 
-const RECONCILE_SCHEMA: &str = r#"{
+const RECONCILE_SCHEMA: &str = r###"{
   "type": "object",
   "properties": {
-    "en": { "type": "string", "description": "The official or best English localization" },
+    "en": { "type": "string", "description": "The official or best localization in the target language" },
     "notes": { "type": "string", "description": "Optional context or explanation for the term mapping" }
   },
   "required": ["en"]
-}"#;
+}"###;
 
-const RECONCILE_PROMPT: &str = "Given the following Japanese proper noun and the provided MediaWiki article content, extract the official English localization or spelling for the term. The term belongs to a specific fictional universe or franchise. If the wiki page doesn't directly contain the term, use your best judgment to translate or romanize the Japanese term accurately into English. For 'notes', you MUST concisely explain what the term means WITHIN THE CONTEXT of this specific book/franchise (e.g., 'A powerful magical sword used by X', 'A federation of planets'), NOT just a generic linguistic definition.";
+const RECONCILE_PROMPT: &str = "Given a Japanese proper noun, any provided MediaWiki article content (Wiki Context), AND the text of the chapter where the term was found (Chapter Context), extract the official {TARGET_LANG} localization or spelling for the term. 
 
-const LAYOUT_SCHEMA: &str = r#"{
+CRITICAL:
+1. PRIORITIZE the 'Chapter Context' over the 'Wiki Context' for the 'notes' field.
+2. The 'notes' field MUST be written in {TARGET_LANG}. It should explain what the term means WITHIN THIS SPECIFIC STORY.
+3. If the 'Wiki Context' contradicts the 'Chapter Context', follow the 'Chapter Context'.
+4. If the 'Wiki Context' is empty or doesn't contain the term, use the 'Chapter Context' and your best judgment to translate/romanize the term into {TARGET_LANG}.
+5. Provide a concise explanation for 'notes' in {TARGET_LANG} (e.g., 'Pedang sihir kuat milik X', 'Federasi antar planet').";
+
+const LAYOUT_SCHEMA: &str = r###"{
   "type": "object",
   "properties": {
     "files": {
@@ -69,7 +76,7 @@ const LAYOUT_SCHEMA: &str = r#"{
     }
   },
   "required": ["files"]
-}"#;
+}"###;
 
 const LAYOUT_PROMPT: &str = "You are an expert EPUB layout formatter.
 Given the following OPF and CSS files from a Japanese EPUB, output the complete, fully modified file contents for each file to normalize the layout to horizontal/LTR for Western reading.
@@ -79,7 +86,7 @@ Target things like:
 - Any `-epub-writing-mode` or similar.
 Return the complete, fully valid file content string for EACH file provided.";
 
-const TRANSLATION_SCHEMA: &str = r#"{
+const TRANSLATION_SCHEMA: &str = r###"{
   "type": "object",
   "properties": {
     "translated_xhtml": {
@@ -101,18 +108,40 @@ const TRANSLATION_SCHEMA: &str = r#"{
     }
   },
   "required": ["translated_xhtml", "new_terms"]
-}"#;
+}"###;
 
-const TRANSLATION_PROMPT: &str = "You are an expert Japanese-to-English EPUB translator specializing in light novels and web novels.
+const TRANSLATION_PROMPT: &str = "You are an expert Japanese-to-{TARGET_LANG} EPUB translator specializing in light novels and web novels.
 
 You will be given an XHTML chapter file and a JSON glossary of approved terminology.
 
 CRITICAL RULES:
 1. ONLY translate text content nodes. NEVER modify, remove, add, or rearrange any XML/HTML tags, attributes, class names, id values, or namespaces.
 2. The output `translated_xhtml` MUST be a complete, valid XHTML document with structure identical to the input.
-3. Use the provided glossary for consistent terminology. The glossary maps Japanese terms to English equivalents.
-4. For new background important or terminology relevant to the series (character names, locations, unique technology, organization names, spells/techniques) NOT in the glossary, add them to `new_terms` with your best English romanization and a brief note containing it's meaning and relevance to the plot.
-5. Maintain the author's tone and style. Do not add, remove, or summarize any plot content.";
+3. Use the provided glossary for consistent terminology.
+4. Extract any proper nouns (names, places, etc.) NOT in the glossary into `new_terms`. For each, provide: 'ja' (original), 'en' ({TARGET_LANG} translation), and 'notes' (description in {TARGET_LANG}). IF NO NEW TERMS ARE FOUND, RETURN AN EMPTY ARRAY [].
+5. Maintain the author's tone and style. Do not add, remove, or summarize plot content.";
+
+fn get_reconcile_prompt(target_lang: &str) -> String {
+    let mut prompt = RECONCILE_PROMPT.replace("{TARGET_LANG}", target_lang);
+    if target_lang.to_lowercase() == "indonesian" {
+        prompt.push_str("\n\nKHUSUS UNTUK BAHASA INDONESIA: Gunakan istilah yang lazim digunakan dalam lokalisasi novel ringan (light novel) resmi. Jika ada istilah fantasi, cari padanan kata yang puitis atau keren namun tetap mudah dimengerti.");
+    }
+    prompt
+}
+
+fn get_translation_prompt(target_lang: &str) -> String {
+    let mut prompt = TRANSLATION_PROMPT.replace("{TARGET_LANG}", target_lang);
+    if target_lang.to_lowercase() == "indonesian" {
+        prompt.push_str(r###"
+
+INSTRUKSI KHUSUS GAYA BAHASA INDONESIA:
+1. Gunakan gaya bahasa novel yang mengalir, ekspresif, dan tidak kaku.
+2. Jangan ragu untuk lebih kreatif dengan pilihan kata (diksi) dan struktur kalimat agar terdengar alami dan emosional bagi pembaca Indonesia, selama makna intinya tetap kohesif dan tidak menyimpang.
+3. Gunakan variasi sinonim yang kaya untuk menghindari repetisi yang membosankan.
+4. Pastikan tingkat kesopanan (honorifik) tercermin dalam pilihan kata karakter (misal: penggunaan kata ganti orang yang tepat)."###);
+    }
+    prompt
+}
 
 // ---------------------------------------------------------------------------
 
@@ -282,17 +311,21 @@ pub async fn reconcile_term(
     model: &str,
     term_ja: &str,
     wiki_context: &str,
+    chapter_context: &str,
+    target_language: &str,
     devel_mode: bool,
 ) -> Result<crate::glossary::Term, AiError> {
     let content = format!(
-        "Japanese Term: {}\n\nWiki Context:\n{}",
-        term_ja, wiki_context
+        "Japanese Term: {}\n\nChapter Context:\n{}\n\nWiki Context:\n{}",
+        term_ja, chapter_context, wiki_context
     );
+
+    let system_prompt = get_reconcile_prompt(target_language);
 
     let response_text = call_gemini(
         api_key,
         model,
-        RECONCILE_PROMPT,
+        &system_prompt,
         &content,
         RECONCILE_SCHEMA,
         devel_mode,
@@ -384,6 +417,7 @@ pub async fn translate_chapter(
     model: &str,
     xhtml: &str,
     glossary: &[crate::glossary::Term],
+    target_language: &str,
     devel_mode: bool,
 ) -> Result<TranslationResult, AiError> {
     // Serialize only approved terms to keep tokens minimal
@@ -406,10 +440,12 @@ pub async fn translate_chapter(
         xhtml
     );
 
+    let system_prompt = get_translation_prompt(target_language);
+
     let response_text = call_gemini(
         api_key,
         model,
-        TRANSLATION_PROMPT,
+        &system_prompt,
         &user_content,
         TRANSLATION_SCHEMA,
         devel_mode,

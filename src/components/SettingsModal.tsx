@@ -13,6 +13,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const [modelTranslate, setModelTranslate] = useState("models/gemini-1.5-flash");
   const [modelNormalize, setModelNormalize] = useState("models/gemini-1.5-flash");
   const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [targetLanguage, setTargetLanguage] = useState("English");
   const [develMode, setDevelMode] = useState(false);
   
   const [isSaving, setIsSaving] = useState(false);
@@ -26,6 +27,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       const savedExtract = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model");
       const savedTranslate = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model");
       const savedNormalize = await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model");
+      const savedLang = await store.get<string>("target_language") || "English";
       const savedDevel = await store.get<boolean>("devel_mode");
       
       if (savedKey) setApiKey(savedKey);
@@ -33,6 +35,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       if (savedExtract) setModelExtract(savedExtract);
       if (savedTranslate) setModelTranslate(savedTranslate);
       if (savedNormalize) setModelNormalize(savedNormalize);
+      setTargetLanguage(savedLang);
       if (typeof savedDevel === "boolean") setDevelMode(savedDevel);
     }
     loadSettings();
@@ -89,6 +92,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       await store.set("gemini_model_normalize", modelNormalize);
       // Keep legacy for backward compatibility if needed by older code
       await store.set("gemini_model", modelExtract); 
+      await store.set("target_language", targetLanguage);
       await store.set("devel_mode", develMode);
       await store.save();
       onClose();
@@ -175,16 +179,30 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
              </div>
           </div>
 
-          <div className="form-group border-t border-subtle pt-4 mt-4">
-            <label htmlFor="wiki-url">Target MediaWiki URL</label>
-            <input 
-              id="wiki-url"
-              type="text" 
-              value={wikiUrl} 
-              onChange={(e) => setWikiUrl(e.target.value)}
-              placeholder="https://ja.wikipedia.org/w/"
-              className="text-input"
-            />
+          <div className="form-group border-t border-subtle pt-4 mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="target-lang">Target Language</label>
+              <select 
+                id="target-lang"
+                value={targetLanguage}
+                onChange={(e) => setTargetLanguage(e.target.value)}
+                className="text-input"
+              >
+                <option value="English">English</option>
+                <option value="Indonesian">Indonesian</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="wiki-url">Wiki URL (e.g. ja.wikipedia.org)</label>
+              <input 
+                id="wiki-url"
+                type="text" 
+                value={wikiUrl} 
+                onChange={(e) => setWikiUrl(e.target.value)}
+                placeholder="https://ja.wikipedia.org/w/"
+                className="text-input"
+              />
+            </div>
           </div>
 
           <div className="form-group flex items-center gap-2 mb-0">

@@ -314,6 +314,8 @@ async fn reconcile_term(
     model: String,
     wiki_url: String,
     entity: String,
+    chapter_context: String,
+    target_language: String,
     devel_mode: bool,
 ) -> Result<glossary::Term, String> {
     let mut wiki_context = String::new();
@@ -330,9 +332,17 @@ async fn reconcile_term(
     }
 
     // 3. Prompt Gemini to extract the localized term
-    ai::reconcile_term(&api_key, &model, &entity, &wiki_context, devel_mode)
-        .await
-        .map_err(|e| e.to_string())
+    ai::reconcile_term(
+        &api_key,
+        &model,
+        &entity,
+        &wiki_context,
+        &chapter_context,
+        &target_language,
+        devel_mode,
+    )
+    .await
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -386,6 +396,7 @@ async fn translate_chapter(
     api_key: String,
     model: String,
     path: String,
+    target_language: String,
     devel_mode: bool,
     state: State<'_, AppState>,
 ) -> Result<ai::TranslationResult, String> {
@@ -399,9 +410,16 @@ async fn translate_chapter(
         (xhtml, glossary)
     };
 
-    ai::translate_chapter(&api_key, &model, &xhtml, &glossary, devel_mode)
-        .await
-        .map_err(|e| e.to_string())
+    ai::translate_chapter(
+        &api_key,
+        &model,
+        &xhtml,
+        &glossary,
+        &target_language,
+        devel_mode,
+    )
+    .await
+    .map_err(|e| e.to_string())
 }
 
 // ---------------------------------------------------------------------------

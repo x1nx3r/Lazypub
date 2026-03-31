@@ -266,6 +266,7 @@ function App() {
       const apiKey = await store.get<string>("gemini_api_key") || "";
       const model = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
       const wikiUrl = await store.get<string>("wiki_url") || "https://ja.wikipedia.org/w/";
+      const targetLanguage = await store.get<string>("target_language") || "English";
       const develMode = await store.get<boolean>("devel_mode") || false;
       
       if (!apiKey) {
@@ -295,7 +296,7 @@ function App() {
         setLoadingMessage(`${getThinkingMsg("reconcile")} (Reconciling ${i + 1}/${extracted.length}: ${entity})`);
         try {
           const term = await invoke<Term>("reconcile_term", {
-             apiKey, model, wikiUrl, entity, develMode 
+             apiKey, model, wikiUrl, entity, chapterContext: chapterContent, targetLanguage, develMode 
           });
           currentGlossary.push(term);
           await invoke("update_glossary", { glossary: currentGlossary });
@@ -353,16 +354,46 @@ function App() {
     try {
       const currentGlossary = await invoke<Term[]>("get_glossary");
       const idx = currentGlossary.findIndex(t => t.id === updatedTerm.id);
+      
+      let newGlossary;
       if (idx !== -1) {
         currentGlossary[idx] = updatedTerm;
-        await invoke("update_glossary", { glossary: currentGlossary });
-        await emit("glossary_updated");
+        newGlossary = currentGlossary;
+      } else {
+        newGlossary = [...currentGlossary, updatedTerm];
       }
+      
+      await invoke("update_glossary", { glossary: newGlossary });
+      await emit("glossary_updated");
       setEditingTerm(null);
     } catch (err) {
       console.error("Failed to save term:", err);
       alert("Failed to save term.");
     }
+  }, []);
+
+  const handleDeleteTerm = useCallback(async (id: string) => {
+    if (!confirm("Are you sure you want to delete this term?")) return;
+    try {
+      const currentGlossary = await invoke<Term[]>("get_glossary");
+      const filtered = currentGlossary.filter(t => t.id !== id);
+      await invoke("update_glossary", { glossary: filtered });
+      await emit("glossary_updated");
+    } catch (err) {
+      console.error("Failed to delete term:", err);
+      alert("Failed to delete term.");
+    }
+  }, []);
+
+  const handleAddNewTerm = useCallback(() => {
+    const newTerm: Term = {
+      id: `manual_${Date.now()}`,
+      ja: "",
+      en: "",
+      notes: null,
+      status: "approved",
+    };
+    setEditingTerm(newTerm);
   }, []);
 
   const handleTranslateChapter = useCallback(async () => {
@@ -373,6 +404,7 @@ function App() {
       const store = await load("settings.json");
       const apiKey = await store.get<string>("gemini_api_key");
       const model = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const targetLanguage = await store.get<string>("target_language") || "English";
       const develMode = await store.get<boolean>("devel_mode") || false;
 
       if (!apiKey) {
@@ -385,6 +417,7 @@ function App() {
         apiKey,
         model,
         path: activeFile,
+        targetLanguage,
         develMode,
       });
 
@@ -779,6 +812,8 @@ function App() {
           {bookInfo && (
             <Scratchpad 
               onTermClick={setEditingTerm} 
+              onDeleteTerm={handleDeleteTerm}
+              onAddTerm={handleAddNewTerm}
               onRequestReconciliation={handleExtractEntities} 
             />
           )}

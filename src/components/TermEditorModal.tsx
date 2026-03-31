@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { load } from "@tauri-apps/plugin-store";
 import { Term } from "../types";
 
 interface TermEditorModalProps {
@@ -8,13 +9,29 @@ interface TermEditorModalProps {
 }
 
 export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps) {
+  const [jaTerm, setJaTerm] = useState(term.ja || "");
   const [enTranslation, setEnTranslation] = useState(term.en || "");
   const [notes, setNotes] = useState(term.notes || "");
   const [status, setStatus] = useState<"pending" | "approved">(term.status);
+  const [targetLanguage, setTargetLanguage] = useState("English");
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const store = await load("settings.json");
+      const lang = await store.get<string>("target_language") || "English";
+      setTargetLanguage(lang);
+    };
+    loadSettings();
+  }, []);
 
   const handleSave = () => {
+    if (!jaTerm.trim()) {
+      alert("Japanese term is required.");
+      return;
+    }
     onSave({
       ...term,
+      ja: jaTerm.trim(),
       en: enTranslation.trim(),
       notes: notes.trim() || null,
       status,
@@ -25,24 +42,26 @@ export function TermEditorModal({ term, onClose, onSave }: TermEditorModalProps)
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Edit Term Verification</h2>
+          <h2>{term.ja ? "Edit Term" : "Add New Term"}</h2>
           <button className="btn btn--icon" onClick={onClose}>✕</button>
         </div>
         
         <div className="modal__body">
           <div className="form-group">
-            <label>Original Japanese Term</label>
+            <label htmlFor="ja-term">Japanese Term</label>
             <input 
+              id="ja-term"
               type="text" 
-              value={term.ja} 
-              disabled
-              className="text-input text-input--disabled"
-              style={{ backgroundColor: "var(--bg-tertiary)" }}
+              value={jaTerm} 
+              onChange={(e) => setJaTerm(e.target.value)}
+              disabled={!!term.ja}
+              className={`text-input ${term.ja ? "text-input--disabled" : ""}`}
+              style={term.ja ? { backgroundColor: "var(--bg-tertiary)" } : {}}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="en-translation">English Translation</label>
+            <label htmlFor="en-translation">{targetLanguage} Translation</label>
             <input 
               id="en-translation"
               type="text" 

@@ -9,7 +9,7 @@ export function LoadingOverlay({ message }: LoadingOverlayProps) {
     <div className="loading-overlay-modal">
       <div className="loading-overlay-modal__card">
         <div className="loading-overlay-modal__spinner" />
-        <p className="loading-overlay-modal__message">{message}</p>
+        <span className="loading-overlay-modal__message">{message}</span>
       </div>
     </div>
   );
