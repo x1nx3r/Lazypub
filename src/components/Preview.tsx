@@ -7,6 +7,7 @@ interface PreviewProps {
   projectDir: string | null;
   activeFile: string | null;
   opfDir: string | null;
+  refreshKey?: number;
   onLocationChange?: (info: { index: number; total: number; label: string }) => void;
   onFileChange?: (path: string) => void;
 }
@@ -18,7 +19,7 @@ export interface PreviewHandle {
   jumpTo: (href: string) => void;
 }
 
-export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, activeFile, opfDir, onLocationChange, onFileChange }, ref) => {
+export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, activeFile, opfDir, refreshKey, onLocationChange, onFileChange }, ref) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const [_fontSize, setFontSize] = useState(100);
@@ -128,7 +129,7 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, ac
     return () => {
       book.destroy();
     };
-  }, [projectDir]);
+  }, [projectDir, refreshKey]);
 
   useEffect(() => {
     if (renditionRef.current && activeFile) {

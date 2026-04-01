@@ -56,6 +56,7 @@ function App() {
   const [loadingMessage, setLoadingMessage] = useState("");
   const [isDebuggerOpen, setIsDebuggerOpen] = useState(false);
   const [debuggerResult, setDebuggerResult] = useState<TranslationResult | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [editorDirty, setEditorDirty] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -249,6 +250,7 @@ function App() {
         content: chapterContent,
       });
       setEditorDirty(false);
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       console.error("Failed to save file:", err);
     } finally {
@@ -442,6 +444,7 @@ function App() {
     // Load the translated content into the editor (user reviews before saving)
     setChapterContent(result.translated_xhtml);
     setEditorDirty(true);
+    setRefreshKey(prev => prev + 1);
 
     // Push new terms to the glossary as "pending"
     if (result.new_terms.length > 0) {
@@ -665,6 +668,7 @@ function App() {
                     projectDir={bookInfo ? bookInfo.project_dir : null} 
                     activeFile={activeFile} 
                     opfDir={bookInfo ? bookInfo.opf_dir : null}
+                    refreshKey={refreshKey}
                     onLocationChange={setPreviewLocation}
                     onFileChange={handleSelectFile}
                   />
