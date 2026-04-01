@@ -11,8 +11,12 @@ With the new persistent architecture, Lazypub has moved past the "volatile memor
 ## Installation
 
 ### Arch Linux (AUR)
-If you are on Arch, you can build the package using the provided PKGBUILD in the arch-build directory:
+If you are on Arch, you can install the package from the AUR: [lazypub-bin](https://aur.archlinux.org/packages/lazypub-bin)
 ```bash
+# Using an AUR helper like yay
+yay -S lazypub-bin
+
+# Or build manually using the provided directory
 git clone https://github.com/x1nx3r/Lazypub.git
 cd Lazypub/arch-build
 makepkg -si
@@ -76,6 +80,4 @@ bun run tauri dev
 Good luck. You'll need it.
 
 ## Known Issues
-
-- **Preview tab not working on Windows**: Currently, the preview tab may fail to render correctly on Windows systems. I don't know what's the cause and i don't have a windows pc on hand so i'm not currently thinking about it. If you have any ideas why and interested in contributing, you can open an issue or just submit a pr. Hell you could just fork this and make your own windows-optimized version. 
 - **Untested Mac build**: The application has not been thoroughly tested on macOS; use with caution.
