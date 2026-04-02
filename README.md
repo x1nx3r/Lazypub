@@ -80,4 +80,5 @@ bun run tauri dev
 Good luck. You'll need it.
 
 ## Known Issues
+- **Preview hot-reload functionality broken** My fix so that the windows port works apparently has broken the epubjs hot-reload funcionality so i'm currently putting this in the backlog, sorry for the users (basically me only) that is currently editing blind
 - **Untested Mac build**: The application has not been thoroughly tested on macOS; use with caution.
