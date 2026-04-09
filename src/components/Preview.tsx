@@ -70,6 +70,12 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, ac
   useEffect(() => {
     if (!projectDir || !viewerRef.current) return;
 
+    // We need to capture the original request function from ePub.js to wrap it with cache busting
+    // This is a bit hacky but ePub.js doesn't export the 'request' utility directly for us to use in settings
+    const dummyBook = ePub("");
+    const epubRequest = (dummyBook as any).request;
+    if (typeof dummyBook.destroy === 'function') dummyBook.destroy();
+
     let normalizedPath = projectDir.replace(/\\/g, '/');
     let safeUrl = convertFileSrc(normalizedPath);
     
@@ -78,7 +84,28 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, ac
         safeUrl += '/';
     }
 
-    const book = ePub(safeUrl);
+    console.log(`[Preview] Initializing book for ${projectDir} (refresh: ${refreshKey})`);
+
+    const book = ePub(safeUrl, {
+      requestMethod: (url: string, type: string, withCredentials: any, headers: any) => {
+        const bustUrl = url.includes('?') ? `${url}&t=${refreshKey}` : `${url}?t=${refreshKey}`;
+        return epubRequest(bustUrl, type, withCredentials, headers);
+      },
+      requestHeaders: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+
+    // Bust iframe cache for linked CSS and images inside the serialized XHTML
+    book.spine.hooks.serialize.register((output: string) => {
+      if (!output) return output;
+      return output.replace(/(href|src)\s*=\s*(["'])([^"'\:]+\.(css|jpg|jpeg|png|gif|svg|webp))(?:\?[^"']*)?(\2)/gi, (_match, attr, q1, path, _ext, q2) => {
+        return `${attr}=${q1}${path}?t=${Date.now()}${q2}`;
+      });
+    });
+
     viewerRef.current.innerHTML = "";
 
     const rendition = book.renderTo(viewerRef.current, {
@@ -112,6 +139,17 @@ export const Preview = forwardRef<PreviewHandle, PreviewProps>(({ projectDir, ac
 
     book.ready.then(() => {
       const spine = (book.spine as any);
+      
+      // Force cache busting on all sections by adding a timestamp query param to their URLs
+      if (spine.spineItems) {
+        spine.spineItems.forEach((section: any) => {
+          if (section.url) {
+            const separator = section.url.includes('?') ? '&' : '?';
+            section.url = `${section.url}${separator}t=${refreshKey}`;
+          }
+        });
+      }
+
       const items = spine.items || (spine.spineItems);
       console.log("EpubJS Spine Items:", items ? items.map((i: any) => i.href) : "unknown");
       
