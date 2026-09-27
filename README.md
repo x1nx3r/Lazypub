@@ -39,12 +39,13 @@ Download the .AppImage from the Releases page, make it executable, and run it.
 - **Entity Extraction & Reconcile**: Automatically finds character names and locations, then crawls Japanese wikis to figure out who "That One Guy" actually is.
 - **Glossary Persistence**: Your glossary (glossary.json) lives in your project root. Version control it, edit it manually, or just look at it to feel productive.
 - **Translation Loop**: Translates chapter-by-chapter while strictly preserving XML tags. It even suggests new glossary terms so you can feel useful while clicking "Approve".
+- **Live Reasoning Stream**: Models that think out loud (GLM and friends) will stream their inner monologue straight into the loading card, timer included. Now you can watch the machine second-guess your novel in real time.
 
 ## The Workflow (How to not learn Japanese)
 
 ### 0. The Setup (Manual Configuration)
-Go to the Settings page. This is where you put your Google AI Studio key. 
-- **Model Selection**: You can set different Gemini models for Extraction, Translation, and Normalization. Use Flash for speed or Pro for those particularly stubborn Japanese structures.
+Go to the Settings page. This is where you put your API key and the Base URL of your provider. Any OpenAI-compatible endpoint works: OpenAI, OpenRouter, a local LM Studio, Ollama, vLLM, or your own proxy.
+- **Model Selection**: You can set different models for Extraction, Translation, and Normalization. Use a cheap fast model for entity extraction, and save the big guns for stubborn prose.
 - **Wiki Integration**: To assist the Entity Extraction, paste a link to a fandom wiki or similar Japanese resource (e.g., https://typemoon.fandom.com/). 
 - **Developer Mode**: Toggle this to see the raw JSON requests and responses in your terminal. Disable it if you'd rather not see how the sausage is made.
 
@@ -52,22 +53,22 @@ Go to the Settings page. This is where you put your Google AI Studio key.
 Click **Import EPUB**. Select your target .epub and then pick an **empty folder** on your system. Lazypub will unpack everything there. This folder is now your persistent project root.
 
 ### 2. The Exorcism (Normalize Layout)
-If your book is a vertical-RL disaster, click **Normalize Layout**. Gemini will rewrite the CSS and OPF to be horizontal-TB. This saves you from hours of manual Regex and existential dread.
+If your book is a vertical-RL disaster, click **Normalize Layout**. The model will rewrite the CSS and OPF to be horizontal-TB. This saves you from hours of manual Regex and existential dread.
 
 ### 3. The Harvest (Extract & Reconcile)
-Open a chapter from the file tree. Click **Extract Entities**. Gemini will scan for proper nouns. It then checks your configured Wiki URL to map them to official English spellings and provide context.
+Open a chapter from the file tree. Click **Extract Entities**. The AI scans for proper nouns. It then checks your configured Wiki URL to map them to official English spellings and provide context.
 
 ### 4. The Audit (Glossary Management)
 Go to the **Glossary** tab. You'll see "Pending" terms. Actually review them. Only "Approved" terms are used to guide the translation loop. If you skip this, expect the protagonist to have three different names by page ten.
 
 ### 5. The Heavy Lifting (Translate)
-Click **Translate**. Gemini takes your approved terms and the raw XHTML. It translates the prose but leaves the structure intact. New terms found during translation are added to your Glossary as pending.
+Click **Translate**. The model takes your approved terms and the raw XHTML. It translates the prose but leaves the structure intact. New terms found during translation are added to your Glossary as pending.
 
 ### 6. The Freedom (Export)
 Once you've finished your masterpiece, click **Export EPUB**. Lazypub bundles your current folder state back into a valid .epub file for your E-reader.
 
 ## Getting an API Key
-Since we aren't paying for your electricity, you'll need your own Google AI Studio key from [Google AI Studio](https://aistudio.google.com/).
+Since we aren't paying for your electricity, bring your own key from any OpenAI-compatible provider: [OpenAI](https://platform.openai.com/), [OpenRouter](https://openrouter.ai/), or run one locally with [Ollama](https://ollama.com/) or [LM Studio](https://lmstudio.ai/). Point the Base URL at it and you're done.
 
 ## Build Instructions
 This is a Tauri app (Vite + React + Rust).
