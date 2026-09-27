@@ -8,10 +8,11 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("https://api.openai.com/v1");
   const [wikiUrl, setWikiUrl] = useState("https://ja.wikipedia.org/w/");
-  const [modelExtract, setModelExtract] = useState("models/gemini-1.5-flash");
-  const [modelTranslate, setModelTranslate] = useState("models/gemini-1.5-flash");
-  const [modelNormalize, setModelNormalize] = useState("models/gemini-1.5-flash");
+  const [modelExtract, setModelExtract] = useState("gpt-4o-mini");
+  const [modelTranslate, setModelTranslate] = useState("gpt-4o-mini");
+  const [modelNormalize, setModelNormalize] = useState("gpt-4o-mini");
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [targetLanguage, setTargetLanguage] = useState("English");
   const [develMode, setDevelMode] = useState(false);
@@ -22,15 +23,17 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   useEffect(() => {
     async function loadSettings() {
       const store = await load("settings.json");
-      const savedKey = await store.get<string>("gemini_api_key");
+      const savedKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key");
+      const savedBaseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
       const savedWiki = await store.get<string>("wiki_url");
-      const savedExtract = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model");
-      const savedTranslate = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model");
-      const savedNormalize = await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model");
+      const savedExtract = await store.get<string>("llm_model_extract") || await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model");
+      const savedTranslate = await store.get<string>("llm_model_translate") || await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model");
+      const savedNormalize = await store.get<string>("llm_model_normalize") || await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model");
       const savedLang = await store.get<string>("target_language") || "English";
       const savedDevel = await store.get<boolean>("devel_mode");
       
       if (savedKey) setApiKey(savedKey);
+      if (savedBaseUrl) setBaseUrl(savedBaseUrl);
       if (savedWiki) setWikiUrl(savedWiki);
       if (savedExtract) setModelExtract(savedExtract);
       if (savedTranslate) setModelTranslate(savedTranslate);
@@ -41,14 +44,16 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     loadSettings();
   }, []);
 
-  const handleFetchModels = async (keyToUse?: string) => {
+  const handleFetchModels = async (keyToUse?: string, urlToUse?: string) => {
     const key = keyToUse || apiKey.trim();
-    if (!key || !key.startsWith("AIzaSy")) return;
+    const url = urlToUse || baseUrl.trim();
+    if (!key) return;
     
     setIsFetchingModels(true);
     try {
       const models = await invoke<string[]>("list_ai_models", { 
         apiKey: key,
+        baseUrl: url,
         develMode 
       });
       setAvailableModels(models);
@@ -63,9 +68,10 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   useEffect(() => {
     async function init() {
       const store = await load("settings.json");
-      const savedKey = await store.get<string>("gemini_api_key");
-      if (savedKey && savedKey.startsWith("AIzaSy")) {
-        handleFetchModels(savedKey);
+      const savedKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key");
+      const savedBaseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
+      if (savedKey) {
+        handleFetchModels(savedKey, savedBaseUrl);
       }
     }
     init();
@@ -74,7 +80,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   // Debounced fetch when API key changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (apiKey.startsWith("AIzaSy") && availableModels.length === 0) {
+      if (apiKey && availableModels.length === 0) {
         handleFetchModels();
       }
     }, 1000);
@@ -85,13 +91,12 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     setIsSaving(true);
     try {
       const store = await load("settings.json");
-      await store.set("gemini_api_key", apiKey.trim());
+      await store.set("llm_api_key", apiKey.trim());
+      await store.set("llm_base_url", baseUrl.trim());
       await store.set("wiki_url", wikiUrl.trim());
-      await store.set("gemini_model_extract", modelExtract);
-      await store.set("gemini_model_translate", modelTranslate);
-      await store.set("gemini_model_normalize", modelNormalize);
-      // Keep legacy for backward compatibility if needed by older code
-      await store.set("gemini_model", modelExtract); 
+      await store.set("llm_model_extract", modelExtract);
+      await store.set("llm_model_translate", modelTranslate);
+      await store.set("llm_model_normalize", modelNormalize);
       await store.set("target_language", targetLanguage);
       await store.set("devel_mode", develMode);
       await store.save();
@@ -113,16 +118,29 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         
         <div className="modal__body">
           <div className="form-group">
-            <label htmlFor="api-key">Google AI Studio API Key (Gemini)</label>
+            <label htmlFor="api-key">API Key</label>
             <input 
               id="api-key"
               type="password" 
               value={apiKey} 
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="AIzaSy..."
+              placeholder="sk-..."
               className="text-input"
             />
             <p className="help-text">Your key is stored securely in your local AppData via Tauri Store.</p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="base-url">Base URL (OpenAI-compatible endpoint)</label>
+            <input 
+              id="base-url"
+              type="text" 
+              value={baseUrl} 
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://api.openai.com/v1"
+              className="text-input"
+            />
+            <p className="help-text">Works with OpenAI, OpenRouter, LM Studio, Ollama, vLLM, or any OpenAI-compatible server.</p>
           </div>
 
           <div className="form-group">
@@ -216,7 +234,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           </div>
           {develMode && (
             <p className="help-text px-6">
-              When enabled, the Rust backend will print all raw API requests and responses (Gemini, MediaWiki) to the terminal.
+              When enabled, the Rust backend will print all raw API requests and responses (LLM, MediaWiki) to the terminal.
             </p>
           )}
         </div>

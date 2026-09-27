@@ -1,6 +1,8 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::time::Duration;
+use tauri::ipc::Channel;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -37,7 +39,8 @@ const EXTRACTION_SCHEMA: &str = r###"{
       "description": "List of extracted Japanese proper nouns, character names, techniques, and locations."
     }
   },
-  "required": ["entities"]
+  "required": ["entities"],
+  "additionalProperties": false
 }"###;
 
 const EXTRACTION_PROMPT: &str = "Extract all proper nouns (character names, locations, unique technology, organization names, spells/techniques) from the following Japanese text. Return only the raw Japanese terms as a JSON array of strings.";
@@ -46,9 +49,10 @@ const RECONCILE_SCHEMA: &str = r###"{
   "type": "object",
   "properties": {
     "en": { "type": "string", "description": "The official or best localization in the target language" },
-    "notes": { "type": "string", "description": "Optional context or explanation for the term mapping" }
+    "notes": { "type": ["string", "null"], "description": "Optional context or explanation for the term mapping" }
   },
-  "required": ["en"]
+  "required": ["en", "notes"],
+  "additionalProperties": false
 }"###;
 
 const RECONCILE_PROMPT: &str = "Given a Japanese proper noun, any provided MediaWiki article content (Wiki Context), AND the text of the chapter where the term was found (Chapter Context), extract the official {TARGET_LANG} localization or spelling for the term. 
@@ -71,11 +75,13 @@ const LAYOUT_SCHEMA: &str = r###"{
           "path": { "type": "string" },
           "content": { "type": "string" }
         },
-        "required": ["path", "content"]
+        "required": ["path", "content"],
+        "additionalProperties": false
       }
     }
   },
-  "required": ["files"]
+  "required": ["files"],
+  "additionalProperties": false
 }"###;
 
 const LAYOUT_PROMPT: &str = "You are an expert EPUB layout formatter.
@@ -101,13 +107,15 @@ const TRANSLATION_SCHEMA: &str = r###"{
         "properties": {
           "ja": { "type": "string" },
           "en": { "type": "string" },
-          "notes": { "type": "string" }
+          "notes": { "type": ["string", "null"] }
         },
-        "required": ["ja", "en"]
+        "required": ["ja", "en", "notes"],
+        "additionalProperties": false
       }
     }
   },
-  "required": ["translated_xhtml", "new_terms"]
+  "required": ["translated_xhtml", "new_terms"],
+  "additionalProperties": false
 }"###;
 
 const TRANSLATION_PROMPT: &str = "You are an expert Japanese-to-{TARGET_LANG} EPUB translator specializing in light novels and web novels.
@@ -145,103 +153,222 @@ INSTRUKSI KHUSUS GAYA BAHASA INDONESIA:
 
 // ---------------------------------------------------------------------------
 
-// Google AI Studio (Gemini) API
+// OpenAI-compatible Chat Completions API
 // ---------------------------------------------------------------------------
 
-/// Helper to call the Gemini 1.5 Flash API with JSON schema enforcement
-async fn call_gemini(
+/// Strip optional markdown code fences that some local backends wrap around JSON.
+fn strip_json_fences(text: &str) -> String {
+    let trimmed = text.trim();
+    if let Some(rest) = trimmed.strip_prefix("```") {
+        // Drop an optional language tag on the same line (e.g. ```json)
+        let rest = rest.splitn(2, '\n').last().unwrap_or(rest);
+        if let Some(inner) = rest.strip_suffix("```") {
+            return inner.trim().to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
+/// Events streamed to the frontend while a request runs.
+#[derive(Clone, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum StreamEvent {
+    Reasoning { delta: String },
+    Phase { phase: String },
+}
+
+/// Call any OpenAI-compatible /chat/completions endpoint with JSON schema enforcement.
+/// The response is consumed as an SSE stream: long generations keep bytes flowing
+/// (avoids proxy idle timeouts like Cloudflare 524), reasoning deltas are forwarded
+/// live to the UI, and content deltas are assembled into the final text.
+async fn call_llm(
     api_key: &str,
+    base_url: &str,
     model: &str,
     system_prompt: &str,
     user_content: &str,
     schema_str: &str,
     devel_mode: bool,
+    on_event: &Channel<StreamEvent>,
 ) -> Result<String, AiError> {
     if api_key.is_empty() {
         return Err(AiError::ApiKeyMissing);
     }
 
-    // Gemini API format
-    let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/{}:generateContent?key={}",
-        model, api_key
-    );
+    let url = format!("{}/chat/completions", base_url.trim_end_matches('/'));
 
     let schema_json: Value = serde_json::from_str(schema_str)?;
 
+    // Many OpenAI-compatible backends (proxy gateways, local servers) silently
+    // drop `response_format`. Embedding the schema in the prompt makes the model
+    // comply regardless of whether the field is honored.
+    let system_prompt = format!(
+        "{system_prompt}\n\nOUTPUT FORMAT (STRICT): Respond with a single JSON object and nothing else. It must match exactly this schema:\n{schema_str}"
+    );
+
     let payload = json!({
-        "systemInstruction": {
-            "parts": [{ "text": system_prompt }]
-        },
-        "contents": [{
-            "parts": [{ "text": user_content }]
-        }],
-        "generationConfig": {
-            "temperature": 0.1,
-            "responseMimeType": "application/json",
-            "responseSchema": schema_json
+        "model": model,
+        "messages": [
+            { "role": "system", "content": system_prompt },
+            { "role": "user", "content": user_content }
+        ],
+        "temperature": 0.1,
+        "stream": true,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "result",
+                "strict": true,
+                "schema": schema_json
+            }
         }
     });
 
     crate::devel_log(
         devel_mode,
         &format!(
-            ">>> [Gemini API] Request JSON:\n{}",
+            ">>> [LLM API] POST {}\nRequest JSON:\n{}",
+            url,
             serde_json::to_string_pretty(&payload).unwrap_or_default()
         ),
     );
 
     let client = Client::new();
 
-    let res = client.post(&url).json(&payload).send().await?;
+    let mut res = match client
+        .post(&url)
+        .bearer_auth(api_key)
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => {
+            crate::devel_log(
+                devel_mode,
+                &format!("!!! [LLM API] Request failed before response: {e}"),
+            );
+            return Err(AiError::Request(e));
+        }
+    };
     let status = res.status();
-    let text = res.text().await.unwrap_or_default();
-
-    crate::devel_log(
-        devel_mode,
-        &format!("<<< [Gemini API] Response JSON:\n{}", text),
-    );
 
     if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
+        let text = res.text().await.unwrap_or_default();
+        crate::devel_log(devel_mode, &format!("<<< [LLM API] Response JSON:\n{}", text));
         return Err(AiError::Api(
             "Quota Exceeded (429). Please wait before trying again.".into(),
         ));
     }
 
     if status == reqwest::StatusCode::SERVICE_UNAVAILABLE {
+        let text = res.text().await.unwrap_or_default();
+        crate::devel_log(devel_mode, &format!("<<< [LLM API] Response JSON:\n{}", text));
         return Err(AiError::Api(
-            "Gemini is currently overloaded (503). Spikes in demand are temporary. Please try again in a few moments.".into(),
+            "The provider is currently overloaded (503). Please try again in a few moments.".into(),
         ));
     }
 
     if !status.is_success() {
-        return Err(AiError::Api(format!("Gemini API failed: {}", text)));
+        let text = res.text().await.unwrap_or_default();
+        crate::devel_log(devel_mode, &format!("<<< [LLM API] Response JSON:\n{}", text));
+        // Prefer the structured message from OpenAI-style error bodies.
+        let message = serde_json::from_str::<Value>(&text)
+            .ok()
+            .and_then(|v| v["error"]["message"].as_str().map(str::to_string))
+            .unwrap_or_else(|| format!("LLM API failed: {}", text));
+        return Err(AiError::Api(message));
     }
 
-    let res_json: Value = serde_json::from_str(&text)?;
+    // Success: consume the SSE stream. Reasoning deltas are forwarded to the
+    // UI in ~100ms batches; content deltas are assembled into the final text.
+    let mut content = String::new();
+    let mut sse_buffer = String::new();
+    let mut reasoning_buf = String::new();
+    let mut last_flush = std::time::Instant::now();
+    let mut writing_notified = false;
 
-    // Extract text from the Gemini response tree
-    let text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-        .as_str()
-        .ok_or_else(|| AiError::Api("Invalid response structure from Gemini".into()))?;
+    loop {
+        match res.chunk().await {
+            Ok(Some(bytes)) => {
+                sse_buffer.push_str(&String::from_utf8_lossy(&bytes));
+                while let Some(pos) = sse_buffer.find('\n') {
+                    let line: String = sse_buffer.drain(..=pos).collect();
+                    let line = line.trim();
+                    let Some(data) = line.strip_prefix("data: ") else {
+                        continue;
+                    };
+                    let data = data.trim();
+                    if data.is_empty() || data == "[DONE]" {
+                        continue;
+                    }
+                    if let Ok(v) = serde_json::from_str::<Value>(data) {
+                        let delta = &v["choices"][0]["delta"];
+                        if let Some(t) = delta["reasoning_content"].as_str() {
+                            reasoning_buf.push_str(t);
+                        }
+                        if let Some(t) = delta["content"].as_str() {
+                            if !writing_notified {
+                                writing_notified = true;
+                                let _ = on_event.send(StreamEvent::Phase {
+                                    phase: "writing".into(),
+                                });
+                            }
+                            content.push_str(t);
+                        }
+                    }
+                }
+                if !reasoning_buf.is_empty() && last_flush.elapsed() >= Duration::from_millis(100) {
+                    let _ = on_event.send(StreamEvent::Reasoning {
+                        delta: std::mem::take(&mut reasoning_buf),
+                    });
+                    last_flush = std::time::Instant::now();
+                }
+            }
+            Ok(None) => break,
+            Err(e) => {
+                crate::devel_log(
+                    devel_mode,
+                    &format!("!!! [LLM API] Stream interrupted: {e}"),
+                );
+                return Err(AiError::Request(e));
+            }
+        }
+    }
+    if !reasoning_buf.is_empty() {
+        let _ = on_event.send(StreamEvent::Reasoning { delta: reasoning_buf });
+    }
 
-    Ok(text.to_string())
+    crate::devel_log(
+        devel_mode,
+        &format!("<<< [LLM API] Streamed Response (assembled):\n{}", content),
+    );
+
+    if content.is_empty() {
+        return Err(AiError::Api("Empty response from LLM API".into()));
+    }
+
+    Ok(strip_json_fences(&content))
 }
 
 /// Run entity extraction on a block of Japanese text
 pub async fn extract_entities(
     api_key: &str,
+    base_url: &str,
     model: &str,
     chapter_text: &str,
     devel_mode: bool,
+    on_event: &Channel<StreamEvent>,
 ) -> Result<Vec<String>, AiError> {
-    let response_text = call_gemini(
+    let response_text = call_llm(
         api_key,
+        base_url,
         model,
         EXTRACTION_PROMPT,
         chapter_text,
         EXTRACTION_SCHEMA,
         devel_mode,
+        on_event,
     )
     .await?;
 
@@ -254,30 +381,31 @@ pub async fn extract_entities(
     Ok(parsed.entities)
 }
 
-/// Fetch available models using the Gemini API
-pub async fn list_models(api_key: &str, devel_mode: bool) -> Result<Vec<String>, AiError> {
+/// Fetch available models from an OpenAI-compatible endpoint.
+pub async fn list_models(
+    api_key: &str,
+    base_url: &str,
+    devel_mode: bool,
+) -> Result<Vec<String>, AiError> {
     if api_key.is_empty() {
         return Err(AiError::ApiKeyMissing);
     }
 
-    let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models?key={}",
-        api_key
-    );
+    let url = format!("{}/models", base_url.trim_end_matches('/'));
 
     crate::devel_log(
         devel_mode,
-        &format!(">>> [Gemini API] ListModels GET: {}", url),
+        &format!(">>> [LLM API] ListModels GET: {}", url),
     );
 
     let client = Client::new();
-    let res = client.get(&url).send().await?;
+    let res = client.get(&url).bearer_auth(api_key).send().await?;
     let status = res.status();
     let text = res.text().await.unwrap_or_default();
 
     crate::devel_log(
         devel_mode,
-        &format!("<<< [Gemini API] ListModels Response:\n{}", text),
+        &format!("<<< [LLM API] ListModels Response:\n{}", text),
     );
 
     if !status.is_success() {
@@ -287,33 +415,28 @@ pub async fn list_models(api_key: &str, devel_mode: bool) -> Result<Vec<String>,
     let res_json: Value = serde_json::from_str(&text)?;
 
     let mut model_names = Vec::new();
-    if let Some(models) = res_json["models"].as_array() {
+    if let Some(models) = res_json["data"].as_array() {
         for m in models {
-            if let Some(name) = m["name"].as_str() {
-                // Only include models that support generateContent
-                if let Some(methods) = m["supportedGenerationMethods"].as_array() {
-                    let supports_generate = methods
-                        .iter()
-                        .any(|m| m.as_str() == Some("generateContent"));
-                    if supports_generate {
-                        model_names.push(name.to_string());
-                    }
-                }
+            if let Some(id) = m["id"].as_str() {
+                model_names.push(id.to_string());
             }
         }
     }
+    model_names.sort();
 
     Ok(model_names)
 }
 
 pub async fn reconcile_term(
     api_key: &str,
+    base_url: &str,
     model: &str,
     term_ja: &str,
     wiki_context: &str,
     chapter_context: &str,
     target_language: &str,
     devel_mode: bool,
+    on_event: &Channel<StreamEvent>,
 ) -> Result<crate::glossary::Term, AiError> {
     let content = format!(
         "Japanese Term: {}\n\nChapter Context:\n{}\n\nWiki Context:\n{}",
@@ -322,13 +445,15 @@ pub async fn reconcile_term(
 
     let system_prompt = get_reconcile_prompt(target_language);
 
-    let response_text = call_gemini(
+    let response_text = call_llm(
         api_key,
+        base_url,
         model,
         &system_prompt,
         &content,
         RECONCILE_SCHEMA,
         devel_mode,
+        on_event,
     )
     .await?;
 
@@ -355,9 +480,11 @@ pub async fn reconcile_term(
 
 pub async fn normalize_layout_files(
     api_key: &str,
+    base_url: &str,
     model: &str,
     files: Vec<crate::epub::LayoutFile>,
     devel_mode: bool,
+    on_event: &Channel<StreamEvent>,
 ) -> Result<Vec<crate::epub::LayoutFile>, AiError> {
     let mut content = String::new();
     for file in files {
@@ -367,13 +494,15 @@ pub async fn normalize_layout_files(
         ));
     }
 
-    let response_text = call_gemini(
+    let response_text = call_llm(
         api_key,
+        base_url,
         model,
         LAYOUT_PROMPT,
         &content,
         LAYOUT_SCHEMA,
         devel_mode,
+        on_event,
     )
     .await?;
 
@@ -414,11 +543,13 @@ pub struct TranslationResult {
 
 pub async fn translate_chapter(
     api_key: &str,
+    base_url: &str,
     model: &str,
     xhtml: &str,
     glossary: &[crate::glossary::Term],
     target_language: &str,
     devel_mode: bool,
+    on_event: &Channel<StreamEvent>,
 ) -> Result<TranslationResult, AiError> {
     // Serialize only approved terms to keep tokens minimal
     let glossary_json: serde_json::Value = glossary
@@ -442,13 +573,15 @@ pub async fn translate_chapter(
 
     let system_prompt = get_translation_prompt(target_language);
 
-    let response_text = call_gemini(
+    let response_text = call_llm(
         api_key,
+        base_url,
         model,
         &system_prompt,
         &user_content,
         TRANSLATION_SCHEMA,
         devel_mode,
+        on_event,
     )
     .await?;
 

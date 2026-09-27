@@ -33,7 +33,7 @@ const phrases = {
   ],
   ai: [
     "Asking the AI to do your job...",
-    "Gemini is thinking. Don't rush perfection.",
+    "The model is thinking. Don't rush perfection.",
     "Consulting the silicon brain...",
     "Waiting for the robot overlords to reply...",
     "Negotiating with the digital oracle...",
@@ -76,5 +76,5 @@ export type ThinkingCategory = keyof typeof phrases;
 export function getThinkingMsg(category: ThinkingCategory): string {
   const list = phrases[category] || phrases.generic;
   const randomIndex = Math.floor(Math.random() * list.length);
-  return `Thinking... ${list[randomIndex]}`;
+  return list[randomIndex];
 }

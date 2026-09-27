@@ -47,3 +47,8 @@ export interface TranslationResult {
   new_terms: NewTerm[];
   errors: string[];
 }
+
+/** Events streamed from the Rust backend while an AI request runs */
+export type StreamEvent =
+  | { type: "reasoning"; delta: string }
+  | { type: "phase"; phase: "thinking" | "writing" };

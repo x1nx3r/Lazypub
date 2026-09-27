@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -11,7 +11,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { Scratchpad } from "./components/Scratchpad";
 import { TermEditorModal } from "./components/TermEditorModal";
 import { LoadingOverlay } from "./components/LoadingOverlay";
-import { OpenResult, Term, FileNode, LayoutFile, TranslationResult } from "./types";
+import { OpenResult, Term, FileNode, LayoutFile, TranslationResult, StreamEvent } from "./types";
 import { load } from "@tauri-apps/plugin-store";
 import { XhtmlDebugger } from "./components/XhtmlDebugger";
 import "./components/XhtmlDebugger.css";
@@ -53,6 +53,34 @@ function App() {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [chapterContent, setChapterContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [reasoningText, setReasoningText] = useState("");
+  const [aiPhase, setAiPhase] = useState<"thinking" | "writing">("thinking");
+  const reasoningBufRef = useRef("");
+
+  // Create a channel for one AI invoke and reset the reasoning stream state
+  const makeStreamChannel = useCallback(() => {
+    reasoningBufRef.current = "";
+    setReasoningText("");
+    setAiPhase("thinking");
+    const channel = new Channel<StreamEvent>();
+    channel.onmessage = (msg) => {
+      if (msg.type === "reasoning") {
+        // Keep a bounded tail; the full transcript lives in lazypub-devel.log
+        reasoningBufRef.current = (reasoningBufRef.current + msg.delta).slice(-8000);
+      } else if (msg.type === "phase") {
+        setAiPhase("writing");
+      }
+    };
+    return channel;
+  }, []);
+
+  // Flush the reasoning buffer into render state at ~10fps
+  useEffect(() => {
+    if (!isLoading) return;
+    const id = setInterval(() => setReasoningText(reasoningBufRef.current), 100);
+    return () => clearInterval(id);
+  }, [isLoading]);
+
   const [loadingMessage, setLoadingMessage] = useState("");
   const [isDebuggerOpen, setIsDebuggerOpen] = useState(false);
   const [debuggerResult, setDebuggerResult] = useState<TranslationResult | null>(null);
@@ -265,14 +293,16 @@ function App() {
     setLoadingMessage(getThinkingMsg("ai"));
     try {
       const store = await load("settings.json");
-      const apiKey = await store.get<string>("gemini_api_key") || "";
-      const model = await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key") || "";
+      const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
+      const model = await store.get<string>("llm_model_extract") || await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const onEvent = makeStreamChannel();
       const wikiUrl = await store.get<string>("wiki_url") || "https://ja.wikipedia.org/w/";
       const targetLanguage = await store.get<string>("target_language") || "English";
       const develMode = await store.get<boolean>("devel_mode") || false;
       
       if (!apiKey) {
-        alert("Please set your Google AI Studio API Key in Settings first.");
+        alert("Please set your API Key in Settings first.");
         setIsSettingsOpen(true);
         return;
       }
@@ -280,9 +310,11 @@ function App() {
       setLoadingMessage(getThinkingMsg("ai"));
       const extracted = await invoke<string[]>("run_entity_extraction", {
         apiKey,
+        baseUrl,
         model,
         text: chapterContent, 
         develMode,
+        onEvent,
       });
       
       let currentGlossary = await invoke<Term[]>("get_glossary");
@@ -297,8 +329,9 @@ function App() {
 
         setLoadingMessage(`${getThinkingMsg("reconcile")} (Reconciling ${i + 1}/${extracted.length}: ${entity})`);
         try {
+          setAiPhase("thinking");
           const term = await invoke<Term>("reconcile_term", {
-             apiKey, model, wikiUrl, entity, chapterContext: chapterContent, targetLanguage, develMode 
+             apiKey, baseUrl, model, wikiUrl, entity, chapterContext: chapterContent, targetLanguage, develMode, onEvent 
           });
           currentGlossary.push(term);
           await invoke("update_glossary", { glossary: currentGlossary });
@@ -309,7 +342,7 @@ function App() {
           break;
         }
 
-        // Add an artificial delay to respect Gemini's free tier rate limits (15 RPM)
+        // Add an artificial delay to respect free-tier rate limits
         if (i < extracted.length - 1) {
           await new Promise((r) => setTimeout(r, 4000));
         }
@@ -404,23 +437,27 @@ function App() {
     setLoadingMessage(getThinkingMsg("ai"));
     try {
       const store = await load("settings.json");
-      const apiKey = await store.get<string>("gemini_api_key");
-      const model = await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key");
+      const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
+      const model = await store.get<string>("llm_model_translate") || await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const onEvent = makeStreamChannel();
       const targetLanguage = await store.get<string>("target_language") || "English";
       const develMode = await store.get<boolean>("devel_mode") || false;
 
       if (!apiKey) {
-        alert("Please set your Google AI Studio API Key in Settings first.");
+        alert("Please set your API Key in Settings first.");
         setIsSettingsOpen(true);
         return;
       }
 
       const result = await invoke<TranslationResult>("translate_chapter", {
         apiKey,
+        baseUrl,
         model,
         path: activeFile,
         targetLanguage,
         develMode,
+        onEvent,
       });
 
       // If there are errors (even if auto-fixed), show the debugger
@@ -498,12 +535,14 @@ function App() {
     setLoadingMessage(getThinkingMsg("layout"));
     try {
       const store = await load("settings.json");
-      const apiKey = await store.get<string>("gemini_api_key") || "";
-      const model = await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model") || "models/gemini-1.5-flash";
+      const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key") || "";
+      const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
+      const model = await store.get<string>("llm_model_normalize") || await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const onEvent = makeStreamChannel();
       const develMode = await store.get<boolean>("devel_mode") || false;
       
       if (!apiKey) {
-        alert("Please set your Google AI Studio API Key in Settings first.");
+        alert("Please set your API Key in Settings first.");
         setIsSettingsOpen(true);
         setIsLoading(false);
         setLoadingMessage("");
@@ -521,13 +560,15 @@ function App() {
       setLoadingMessage(getThinkingMsg("ai"));
       const newFiles = await invoke<LayoutFile[]>("normalize_layout_files", {
         apiKey,
+        baseUrl,
         model,
         files: layoutFiles,
         develMode,
+        onEvent,
       });
 
       if (newFiles.length === 0) {
-        alert("Gemini returned no files to patch.");
+        alert("The model returned no files to patch.");
         setIsLoading(false);
         setLoadingMessage("");
         return;
@@ -555,7 +596,7 @@ function App() {
   // --- Render ---
   return (
     <div className="app">
-      {isLoading && <LoadingOverlay message={loadingMessage} />}
+      {isLoading && <LoadingOverlay message={loadingMessage} reasoning={reasoningText} phase={aiPhase} />}
       {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
       {editingTerm && <TermEditorModal term={editingTerm} onClose={() => setEditingTerm(null)} onSave={handleSaveTerm} />}
 
@@ -747,7 +788,7 @@ function App() {
                       </button>
                     )}
 
-                    <button className="toolbox-item toolbox-item--primary" onClick={handleTranslateChapter} disabled={isLoading} title="Translate chapter via Gemini">
+                    <button className="toolbox-item toolbox-item--primary" onClick={handleTranslateChapter} disabled={isLoading} title="Translate chapter via AI">
                       <span className="toolbox-item__icon"><Languages /></span>
                       <span className="toolbox-item__label">Translate</span>
                     </button>
@@ -843,10 +884,6 @@ function App() {
             setDebuggerResult(null);
           }}
         />
-      )}
-
-      {isLoading && (
-        <LoadingOverlay message={loadingMessage} />
       )}
     </div>
   );

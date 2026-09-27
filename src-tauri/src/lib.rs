@@ -270,18 +270,24 @@ fn save_asset(path: String, dest: String, state: State<AppState>) -> Result<(), 
 #[tauri::command]
 async fn run_entity_extraction(
     api_key: String,
+    base_url: String,
     model: String,
     text: String,
     devel_mode: bool,
+    on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<Vec<String>, String> {
-    ai::extract_entities(&api_key, &model, &text, devel_mode)
+    ai::extract_entities(&api_key, &base_url, &model, &text, devel_mode, &on_event)
         .await
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn list_ai_models(api_key: String, devel_mode: bool) -> Result<Vec<String>, String> {
-    ai::list_models(&api_key, devel_mode)
+async fn list_ai_models(
+    api_key: String,
+    base_url: String,
+    devel_mode: bool,
+) -> Result<Vec<String>, String> {
+    ai::list_models(&api_key, &base_url, devel_mode)
         .await
         .map_err(|e| e.to_string())
 }
@@ -311,12 +317,14 @@ async fn fetch_wiki_page(
 #[tauri::command]
 async fn reconcile_term(
     api_key: String,
+    base_url: String,
     model: String,
     wiki_url: String,
     entity: String,
     chapter_context: String,
     target_language: String,
     devel_mode: bool,
+    on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<glossary::Term, String> {
     let mut wiki_context = String::new();
 
@@ -331,15 +339,17 @@ async fn reconcile_term(
         }
     }
 
-    // 3. Prompt Gemini to extract the localized term
+    // 3. Prompt the model to extract the localized term
     ai::reconcile_term(
         &api_key,
+        &base_url,
         &model,
         &entity,
         &wiki_context,
         &chapter_context,
         &target_language,
         devel_mode,
+        &on_event,
     )
     .await
     .map_err(|e| e.to_string())
@@ -378,11 +388,13 @@ fn get_layout_files(state: State<AppState>) -> Result<Vec<epub::LayoutFile>, Str
 #[tauri::command]
 async fn normalize_layout_files(
     api_key: String,
+    base_url: String,
     model: String,
     files: Vec<epub::LayoutFile>,
     devel_mode: bool,
+    on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<Vec<epub::LayoutFile>, String> {
-    ai::normalize_layout_files(&api_key, &model, files, devel_mode)
+    ai::normalize_layout_files(&api_key, &base_url, &model, files, devel_mode, &on_event)
         .await
         .map_err(|e| e.to_string())
 }
@@ -394,10 +406,12 @@ async fn normalize_layout_files(
 #[tauri::command]
 async fn translate_chapter(
     api_key: String,
+    base_url: String,
     model: String,
     path: String,
     target_language: String,
     devel_mode: bool,
+    on_event: tauri::ipc::Channel<ai::StreamEvent>,
     state: State<'_, AppState>,
 ) -> Result<ai::TranslationResult, String> {
     let (xhtml, glossary) = {
@@ -412,11 +426,13 @@ async fn translate_chapter(
 
     ai::translate_chapter(
         &api_key,
+        &base_url,
         &model,
         &xhtml,
         &glossary,
         &target_language,
         devel_mode,
+        &on_event,
     )
     .await
     .map_err(|e| e.to_string())
