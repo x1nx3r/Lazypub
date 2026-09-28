@@ -296,6 +296,7 @@ function App() {
       const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key") || "";
       const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
       const model = await store.get<string>("llm_model_extract") || await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const reasoningEffort = await store.get<string>("llm_reasoning_effort") || "";
       const onEvent = makeStreamChannel();
       const wikiUrl = await store.get<string>("wiki_url") || "https://ja.wikipedia.org/w/";
       const targetLanguage = await store.get<string>("target_language") || "English";
@@ -312,6 +313,7 @@ function App() {
         apiKey,
         baseUrl,
         model,
+        reasoningEffort,
         text: chapterContent, 
         develMode,
         onEvent,
@@ -331,7 +333,7 @@ function App() {
         try {
           setAiPhase("thinking");
           const term = await invoke<Term>("reconcile_term", {
-             apiKey, baseUrl, model, wikiUrl, entity, chapterContext: chapterContent, targetLanguage, develMode, onEvent 
+             apiKey, baseUrl, model, reasoningEffort, wikiUrl, entity, chapterContext: chapterContent, targetLanguage, develMode, onEvent 
           });
           currentGlossary.push(term);
           await invoke("update_glossary", { glossary: currentGlossary });
@@ -440,6 +442,7 @@ function App() {
       const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key");
       const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
       const model = await store.get<string>("llm_model_translate") || await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const reasoningEffort = await store.get<string>("llm_reasoning_effort") || "";
       const onEvent = makeStreamChannel();
       const targetLanguage = await store.get<string>("target_language") || "English";
       const develMode = await store.get<boolean>("devel_mode") || false;
@@ -454,6 +457,7 @@ function App() {
         apiKey,
         baseUrl,
         model,
+        reasoningEffort,
         path: activeFile,
         targetLanguage,
         develMode,
@@ -538,6 +542,7 @@ function App() {
       const apiKey = await store.get<string>("llm_api_key") || await store.get<string>("gemini_api_key") || "";
       const baseUrl = await store.get<string>("llm_base_url") || "https://api.openai.com/v1";
       const model = await store.get<string>("llm_model_normalize") || await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model") || "gpt-4o-mini";
+      const reasoningEffort = await store.get<string>("llm_reasoning_effort") || "";
       const onEvent = makeStreamChannel();
       const develMode = await store.get<boolean>("devel_mode") || false;
       
@@ -562,6 +567,7 @@ function App() {
         apiKey,
         baseUrl,
         model,
+        reasoningEffort,
         files: layoutFiles,
         develMode,
         onEvent,

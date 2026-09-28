@@ -13,6 +13,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const [modelExtract, setModelExtract] = useState("gpt-4o-mini");
   const [modelTranslate, setModelTranslate] = useState("gpt-4o-mini");
   const [modelNormalize, setModelNormalize] = useState("gpt-4o-mini");
+  const [reasoningEffort, setReasoningEffort] = useState("");
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [targetLanguage, setTargetLanguage] = useState("English");
   const [develMode, setDevelMode] = useState(false);
@@ -29,6 +30,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       const savedExtract = await store.get<string>("llm_model_extract") || await store.get<string>("gemini_model_extract") || await store.get<string>("gemini_model");
       const savedTranslate = await store.get<string>("llm_model_translate") || await store.get<string>("gemini_model_translate") || await store.get<string>("gemini_model");
       const savedNormalize = await store.get<string>("llm_model_normalize") || await store.get<string>("gemini_model_normalize") || await store.get<string>("gemini_model");
+      const savedEffort = await store.get<string>("llm_reasoning_effort") || "";
       const savedLang = await store.get<string>("target_language") || "English";
       const savedDevel = await store.get<boolean>("devel_mode");
       
@@ -38,6 +40,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       if (savedExtract) setModelExtract(savedExtract);
       if (savedTranslate) setModelTranslate(savedTranslate);
       if (savedNormalize) setModelNormalize(savedNormalize);
+      setReasoningEffort(savedEffort);
       setTargetLanguage(savedLang);
       if (typeof savedDevel === "boolean") setDevelMode(savedDevel);
     }
@@ -97,6 +100,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       await store.set("llm_model_extract", modelExtract);
       await store.set("llm_model_translate", modelTranslate);
       await store.set("llm_model_normalize", modelNormalize);
+      await store.set("llm_reasoning_effort", reasoningEffort);
       await store.set("target_language", targetLanguage);
       await store.set("devel_mode", develMode);
       await store.save();
@@ -195,6 +199,22 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   </select>
                 </div>
              </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="reasoning-effort">Reasoning Effort</label>
+            <select
+              id="reasoning-effort"
+              value={reasoningEffort}
+              onChange={(e) => setReasoningEffort(e.target.value)}
+              className="text-input"
+            >
+              <option value="">Model default</option>
+              <option value="low">Low (faster, cheaper)</option>
+              <option value="medium">Medium</option>
+              <option value="high">High (deepest thinking)</option>
+            </select>
+            <p className="help-text">Sent as reasoning_effort. Only models that expose thinking use it; switch back to Model default if your provider rejects it.</p>
           </div>
 
           <div className="form-group border-t border-subtle pt-4 mt-4 grid grid-cols-2 gap-4">

@@ -274,9 +274,10 @@ async fn run_entity_extraction(
     model: String,
     text: String,
     devel_mode: bool,
+    reasoning_effort: String,
     on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<Vec<String>, String> {
-    ai::extract_entities(&api_key, &base_url, &model, &text, devel_mode, &on_event)
+    ai::extract_entities(&api_key, &base_url, &model, &text, devel_mode, &reasoning_effort, &on_event)
         .await
         .map_err(|e| e.to_string())
 }
@@ -324,6 +325,7 @@ async fn reconcile_term(
     chapter_context: String,
     target_language: String,
     devel_mode: bool,
+    reasoning_effort: String,
     on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<glossary::Term, String> {
     let mut wiki_context = String::new();
@@ -349,6 +351,7 @@ async fn reconcile_term(
         &chapter_context,
         &target_language,
         devel_mode,
+        &reasoning_effort,
         &on_event,
     )
     .await
@@ -392,9 +395,10 @@ async fn normalize_layout_files(
     model: String,
     files: Vec<epub::LayoutFile>,
     devel_mode: bool,
+    reasoning_effort: String,
     on_event: tauri::ipc::Channel<ai::StreamEvent>,
 ) -> Result<Vec<epub::LayoutFile>, String> {
-    ai::normalize_layout_files(&api_key, &base_url, &model, files, devel_mode, &on_event)
+    ai::normalize_layout_files(&api_key, &base_url, &model, files, devel_mode, &reasoning_effort, &on_event)
         .await
         .map_err(|e| e.to_string())
 }
@@ -411,6 +415,7 @@ async fn translate_chapter(
     path: String,
     target_language: String,
     devel_mode: bool,
+    reasoning_effort: String,
     on_event: tauri::ipc::Channel<ai::StreamEvent>,
     state: State<'_, AppState>,
 ) -> Result<ai::TranslationResult, String> {
@@ -432,6 +437,7 @@ async fn translate_chapter(
         &glossary,
         &target_language,
         devel_mode,
+        &reasoning_effort,
         &on_event,
     )
     .await

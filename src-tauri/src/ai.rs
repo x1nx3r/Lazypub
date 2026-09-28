@@ -189,6 +189,7 @@ async fn call_llm(
     user_content: &str,
     schema_str: &str,
     devel_mode: bool,
+    reasoning_effort: &str,
     on_event: &Channel<StreamEvent>,
 ) -> Result<String, AiError> {
     if api_key.is_empty() {
@@ -206,7 +207,7 @@ async fn call_llm(
         "{system_prompt}\n\nOUTPUT FORMAT (STRICT): Respond with a single JSON object and nothing else. It must match exactly this schema:\n{schema_str}"
     );
 
-    let payload = json!({
+    let mut payload = json!({
         "model": model,
         "messages": [
             { "role": "system", "content": system_prompt },
@@ -223,6 +224,12 @@ async fn call_llm(
             }
         }
     });
+
+    // Only send reasoning_effort when set. Backends and models that do not
+    // support it may reject unknown or invalid values.
+    if !reasoning_effort.is_empty() {
+        payload["reasoning_effort"] = json!(reasoning_effort);
+    }
 
     crate::devel_log(
         devel_mode,
@@ -358,6 +365,7 @@ pub async fn extract_entities(
     model: &str,
     chapter_text: &str,
     devel_mode: bool,
+    reasoning_effort: &str,
     on_event: &Channel<StreamEvent>,
 ) -> Result<Vec<String>, AiError> {
     let response_text = call_llm(
@@ -368,6 +376,7 @@ pub async fn extract_entities(
         chapter_text,
         EXTRACTION_SCHEMA,
         devel_mode,
+        reasoning_effort,
         on_event,
     )
     .await?;
@@ -436,6 +445,7 @@ pub async fn reconcile_term(
     chapter_context: &str,
     target_language: &str,
     devel_mode: bool,
+    reasoning_effort: &str,
     on_event: &Channel<StreamEvent>,
 ) -> Result<crate::glossary::Term, AiError> {
     let content = format!(
@@ -453,6 +463,7 @@ pub async fn reconcile_term(
         &content,
         RECONCILE_SCHEMA,
         devel_mode,
+        reasoning_effort,
         on_event,
     )
     .await?;
@@ -484,6 +495,7 @@ pub async fn normalize_layout_files(
     model: &str,
     files: Vec<crate::epub::LayoutFile>,
     devel_mode: bool,
+    reasoning_effort: &str,
     on_event: &Channel<StreamEvent>,
 ) -> Result<Vec<crate::epub::LayoutFile>, AiError> {
     let mut content = String::new();
@@ -502,6 +514,7 @@ pub async fn normalize_layout_files(
         &content,
         LAYOUT_SCHEMA,
         devel_mode,
+        reasoning_effort,
         on_event,
     )
     .await?;
@@ -549,6 +562,7 @@ pub async fn translate_chapter(
     glossary: &[crate::glossary::Term],
     target_language: &str,
     devel_mode: bool,
+    reasoning_effort: &str,
     on_event: &Channel<StreamEvent>,
 ) -> Result<TranslationResult, AiError> {
     // Serialize only approved terms to keep tokens minimal
@@ -581,6 +595,7 @@ pub async fn translate_chapter(
         &user_content,
         TRANSLATION_SCHEMA,
         devel_mode,
+        reasoning_effort,
         on_event,
     )
     .await?;
